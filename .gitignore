@@ -11,3 +11,4 @@ npm-debug.log*
 # Deployment and editor artifacts
 .vercel/
 .idea/
+.github-cli-config/
