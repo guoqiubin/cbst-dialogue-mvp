@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>认知谬误识别 | CBST 训练器</title>
+    <meta
+      name="description"
+      content="输入一句话或一段双人对话，AI 基于受控术语库识别其中可能存在的认知扭曲或逻辑谬误。"
+    />
+    <link rel="stylesheet" href="./styles.css?v=20260830d" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero cognitive-hero">
+        <div>
+          <p class="eyebrow">思维识别练习</p>
+          <h1>认知谬误识别</h1>
+          <p class="hero-copy">
+            输入一句话、独白，或最多两名角色的对话。AI 会基于受控术语库，从文本证据出发识别其中可能存在的认知扭曲或逻辑谬误。
+          </p>
+        </div>
+        <div class="hero-badge">
+          <span>学习工具</span>
+          <strong>先看证据，再谈判断</strong>
+          <small>最多展示 5 项，不强行匹配</small>
+        </div>
+      </header>
+
+      <section class="module-hub" aria-label="训练模块体系">
+        <div class="module-hub-copy">
+          <p class="eyebrow">技能模块</p>
+          <strong>请选择训练模块</strong>
+        </div>
+        <div class="module-hub-actions">
+          <nav class="module-rail">
+            <a class="module-link active" href="./cognitive.html" aria-current="page">认知谬误识别</a>
+            <a class="module-link" href="./index.html">CBST对话</a>
+            <a class="module-link" href="./empathy.html">共情训练</a>
+            <a class="module-link" href="./listening.html">倾听训练</a>
+          </nav>
+          <a class="manual-link" href="./manual.html" aria-label="打开 CBST 对话法使用手册">
+            <span class="manual-link-icon" aria-hidden="true">📘</span>
+            <span>使用手册</span>
+          </a>
+        </div>
+      </section>
+
+      <main class="cognitive-layout">
+        <section class="panel cognitive-workbench interactive-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">文本分析</p>
+              <h2>输入需要检验的内容</h2>
+            </div>
+          </div>
+
+          <section class="notice-card" aria-label="功能说明">
+            <p class="eyebrow">使用说明</p>
+            <h3>常见认知谬误 / 逻辑谬误检验</h3>
+            <p>
+              输入任何一句话、一段观点、独白或双人对话。系统只会在原文证据充分时给出可能的思维模式；同义概念只保留一个标准名称。
+            </p>
+          </section>
+
+          <div id="cognitive-connection-banner" class="connection-banner checking">正在检查模型连接状态...</div>
+
+          <label class="analysis-label" for="analysis-editor">需要分析的文本</label>
+          <div
+            id="analysis-editor"
+            class="field-control rich-editor analysis-editor"
+            contenteditable="true"
+            role="textbox"
+            aria-multiline="true"
+            data-placeholder="例如：女友：如果你不记得我的生日就是不爱我。&#10;男友：我只是这次工作太忙忘记了。"
+          ></div>
+          <p class="input-note">支持自然表达、粘贴、换行与最多两名角色的对话。无需使用固定格式。</p>
+
+          <div class="action-row cognitive-actions">
+            <button id="analyze-button" class="primary-button" type="button">分析文本</button>
+            <button id="clear-analysis-button" class="secondary-button" type="button">清空内容</button>
+          </div>
+
+          <div id="cognitive-status-box" class="status-box hidden" aria-live="polite"></div>
+        </section>
+
+        <section class="panel cognitive-result-panel interactive-panel" aria-live="polite">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">分析结果</p>
+              <h2>基于原文的可能模式</h2>
+            </div>
+            <span id="result-count" class="turn-indicator">等待分析</span>
+          </div>
+
+          <div id="analysis-results" class="analysis-results">
+            <div class="empty-state">
+              输入文本后点击“分析文本”。结果会优先引用原句证据，而不是对说话者下判断。
+            </div>
+          </div>
+
+          <div id="featured-action" class="featured-action hidden">
+            <button id="toggle-featured-button" class="secondary-button" type="button" disabled>加入精选</button>
+            <span id="featured-action-note" class="role-tools-note">分析完成后，可将原文和本次解析一并收藏。</span>
+          </div>
+
+          <aside class="disclaimer-card">
+            <strong>使用边界</strong>
+            <p>
+              本工具仅用于学习与自我观察，帮助识别文本中可能存在的认知或逻辑思维模式；其分析结果不构成心理健康诊断、心理治疗建议、医疗意见或危机干预。若你正经历持续或明显的情绪困扰、功能受损，或存在自伤 / 伤人风险，请尽快联系当地具备资质的医疗机构、心理健康专业人员或紧急援助服务。
+            </p>
+          </aside>
+        </section>
+      </main>
+
+      <section class="panel featured-panel interactive-panel" aria-labelledby="featured-title">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">内容收藏</p>
+            <h2 id="featured-title">小编精选</h2>
+          </div>
+          <span id="featured-count" class="turn-indicator">0 条</span>
+        </div>
+        <p class="featured-intro">收藏原文与对应解析，便于回看、整理或作为后续内容素材。内容仅保存在当前浏览器。</p>
+        <div id="featured-list" class="featured-list">
+          <div class="empty-state">还没有精选内容。完成一次分析后，可以在结果区加入精选。</div>
+        </div>
+      </section>
+
+      <section class="panel history-panel interactive-panel" aria-labelledby="history-title">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">本机记录</p>
+            <h2 id="history-title">最近分析</h2>
+          </div>
+          <div class="history-actions">
+            <span id="history-count" class="turn-indicator">0 条</span>
+            <button id="clear-local-records-button" class="clear-records-button" type="button">清空本机记录</button>
+          </div>
+        </div>
+        <p class="featured-intro">会自动保存你的输入草稿、分析结果和精选内容，仅保存在当前浏览器。更换设备、浏览器或清除浏览器数据后无法恢复。</p>
+        <div id="history-list" class="history-list">
+          <div class="empty-state">还没有分析记录。完成一次分析后会自动保存在这里。</div>
+        </div>
+      </section>
+    </div>
+
+    <script src="./cognitive.js?v=20260830c"></script>
+  </body>
+</html>

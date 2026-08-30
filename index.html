@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CBST 对话练习器</title>
+    <meta
+      name="description"
+      content="输入关系场景、AI角色、用户角色和事件背景，AI 生成 CBST 双人对话开题、多轮互动与专业点评。"
+    />
+    <link rel="stylesheet" href="./styles.css?v=20260830d" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">CBST 对话训练器</p>
+          <h1>案例生成与对话练习器</h1>
+          <p class="hero-copy">
+            输入关系场景、双方角色和事件背景，AI 会基于这些信息生成一个模拟对话场景，并先说第一句话。你继续回应，自己决定何时结束，再拿到严格的
+            CBST 专业点评。
+          </p>
+        </div>
+        <div class="hero-badge">
+          <span>测试版</span>
+          <strong>训练 CBST 对话</strong>
+          <small>支持输入记忆、多轮练习、结束后点评</small>
+        </div>
+      </header>
+
+      <section class="module-hub" aria-label="训练模块体系">
+        <div class="module-hub-copy">
+          <p class="eyebrow">技能模块</p>
+          <strong>请选择训练模块</strong>
+        </div>
+        <div class="module-hub-actions">
+          <nav class="module-rail">
+            <a class="module-link" href="./cognitive.html">认知谬误识别</a>
+            <a class="module-link active" href="./index.html" aria-current="page">CBST对话</a>
+            <a class="module-link" href="./empathy.html">共情训练</a>
+            <a class="module-link" href="./listening.html">倾听训练</a>
+          </nav>
+          <a class="manual-link" href="./manual.html" aria-label="打开 CBST 对话法使用手册">
+            <span class="manual-link-icon" aria-hidden="true">📘</span>
+            <span>使用手册</span>
+          </a>
+        </div>
+      </section>
+
+      <main class="layout">
+        <section class="panel control-panel interactive-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">信息补充</p>
+              <h2>参数输入区</h2>
+            </div>
+          </div>
+
+          <div id="connection-banner" class="connection-banner checking">正在检查模型连接状态...</div>
+
+          <form id="generator-form" class="generator-form">
+            <div class="field-group">
+              <label for="scene-select">关系场景</label>
+              <select id="scene-select" class="field-control">
+                <option value="parent-child">亲子关系</option>
+                <option value="intimacy">亲密关系</option>
+                <option value="workplace">职场沟通</option>
+                <option value="parents">父母关系</option>
+              </select>
+            </div>
+
+            <div class="field-row">
+              <div class="field-group">
+                <label for="ai-role-select">AI 角色</label>
+                <select id="ai-role-select" class="field-control"></select>
+                <input
+                  id="ai-role-custom-input"
+                  class="field-control field-control-compact"
+                  type="text"
+                  placeholder="输入自定义 AI 角色后按回车，例如：客户"
+                />
+              </div>
+              <div class="field-group">
+                <label for="user-role-select">用户角色</label>
+                <select id="user-role-select" class="field-control"></select>
+                <input
+                  id="user-role-custom-input"
+                  class="field-control field-control-compact"
+                  type="text"
+                  placeholder="输入自定义用户角色后按回车，例如：青少年儿子"
+                />
+              </div>
+            </div>
+
+            <div class="role-tools">
+              <button id="swap-roles-button" class="secondary-button" type="button">互换角色</button>
+              <span class="role-tools-note">当前场景下，AI 角色和用户角色可以双向互换选择。</span>
+            </div>
+
+            <div class="field-group">
+              <label for="event-editor">事件描述</label>
+              <div
+                id="event-editor"
+                class="field-control rich-editor"
+                contenteditable="true"
+                data-placeholder="例如：孩子放学后一直拖延洗澡，爸爸已经提醒了三次，语气越来越重；或者：领导中午前临时压了两个任务，还要求结果不能打折。"
+              ></div>
+            </div>
+
+            <div class="memory-note">系统会自动记住你上次填写的参数和角色选项。AI 会结合这些信息生成第一句话。</div>
+
+            <div class="action-row">
+              <button id="generate-case-button" class="primary-button" type="submit">提交并生成案例</button>
+              <button id="reset-memory-button" class="secondary-button" type="button">清空记忆</button>
+            </div>
+          </form>
+
+          <div id="status-box" class="status-box hidden" aria-live="polite"></div>
+
+          <div id="case-card" class="case-card" aria-live="polite"></div>
+
+          <div class="composer-panel">
+            <div class="turn-head">
+              <div>
+                <p class="eyebrow">作答区</p>
+                <h3 id="focus-title">等待生成案例</h3>
+              </div>
+              <span id="turn-indicator" class="turn-indicator">0 轮</span>
+            </div>
+
+            <div id="focus-brief" class="focus-brief empty-state">
+              先输入参数并点击“提交并生成案例”。AI 会先给出场景描述和第一句话，你再顺着这句话开始作答。
+            </div>
+
+            <div class="hint-trigger-row">
+              <button id="hint-toggle-button" class="text-button" type="button" disabled>需要提示？</button>
+            </div>
+
+            <div id="hint-panel" class="hint-panel hidden">
+              <div class="hint-header">
+                <strong>本轮推荐逻辑字词</strong>
+                <span id="hint-summary" class="hint-summary"></span>
+              </div>
+              <div id="hint-tags" class="hint-tags"></div>
+            </div>
+
+            <div id="validation-panel" class="validation-panel hidden">
+              <strong>请尽量使用 CBST 逻辑字词进行回复</strong>
+              <p id="validation-message"></p>
+              <div id="validation-tags" class="hint-tags"></div>
+              <div class="action-row">
+                <button id="validation-close-button" class="secondary-button" type="button">我去修改</button>
+                <button id="force-submit-button" class="primary-button" type="button">仍然提交</button>
+              </div>
+            </div>
+
+            <label class="response-label" for="response-input">你的回应</label>
+            <textarea
+              id="response-input"
+              class="response-input"
+              rows="6"
+              placeholder="例如：你说的是我完全做不到，还是这两个任务一起压过来才做不到呢？"
+              disabled
+            ></textarea>
+
+            <div class="action-row">
+              <button id="submit-turn-button" class="primary-button" type="button" disabled>提交回复</button>
+              <button id="end-dialogue-button" class="secondary-button" type="button" disabled>结束对话</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel workspace-panel interactive-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">模拟对话</p>
+              <h2>对话过程</h2>
+            </div>
+          </div>
+
+          <div id="conversation-view" class="conversation-view">
+            <div class="empty-state">
+              生成案例后，这里会显示 AI 和用户的完整多轮对话。
+            </div>
+          </div>
+
+          <div id="evaluation-view" class="evaluation-view hidden"></div>
+        </section>
+
+        <aside class="panel sidebar-panel interactive-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">知识卡片</p>
+              <h2>CBST 逻辑卡片</h2>
+            </div>
+          </div>
+
+          <div id="logic-reference" class="logic-reference"></div>
+
+          <div class="principle-box">
+            <h3>结束点评时会重点检查</h3>
+            <ul>
+              <li>是否先共情，再拆解，而不是立刻评价或管理对方。</li>
+              <li>是否用了 CBST 逻辑字词，而不是空泛安慰或命令。</li>
+              <li>是否避免比较、读心、甩锅、否定感受和代替判断。</li>
+              <li>是否推动到了边界澄清、行动推进或更具体的下一步。</li>
+            </ul>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <script src="./app.js?v=20260830a"></script>
+  </body>
+</html>

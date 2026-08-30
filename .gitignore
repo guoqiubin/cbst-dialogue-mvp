@@ -1,0 +1,13 @@
+# Local secrets and environment configuration
+.env
+.env.local
+.env.*.local
+
+# Dependencies and local tooling
+node_modules/
+.DS_Store
+npm-debug.log*
+
+# Deployment and editor artifacts
+.vercel/
+.idea/
