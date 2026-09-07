@@ -9,6 +9,7 @@ const { URL } = require("node:url");
 loadDotEnv(path.join(__dirname, ".env"));
 
 const apiHandler = require("./api/chat.js");
+const publicConfigHandler = require("./api/public-config.js");
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "127.0.0.1";
@@ -32,15 +33,15 @@ const server = http.createServer(async (req, res) => {
     const requestUrl = new URL(req.url || "/", `http://${req.headers.host || `${HOST}:${PORT}`}`);
 
     if (requestUrl.pathname === "/api/status") {
-      return sendJson(res, 200, {
-        serverReady: true,
-        openaiConfigured: Boolean(process.env.OPENAI_API_KEY),
-        model: OPENAI_MODEL
-      });
+      return statusHandler(req, createExpressLikeResponse(res));
     }
 
     if (requestUrl.pathname === "/api/chat") {
       return handleApiRequest(req, res);
+    }
+
+    if (requestUrl.pathname === "/api/public-config") {
+      return publicConfigHandler(req, createExpressLikeResponse(res));
     }
 
     return handleStaticRequest(requestUrl.pathname, res);
@@ -62,6 +63,14 @@ async function handleApiRequest(req, res) {
   const wrappedReq = { method: req.method, body };
   const wrappedRes = createExpressLikeResponse(res);
   return apiHandler(wrappedReq, wrappedRes);
+}
+
+async function statusHandler(_req, res) {
+  return res.status(200).json({
+    serverReady: true,
+    openaiConfigured: Boolean(process.env.OPENAI_API_KEY),
+    model: OPENAI_MODEL
+  });
 }
 
 async function handleStaticRequest(pathname, res) {

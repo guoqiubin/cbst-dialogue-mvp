@@ -31,6 +31,8 @@ const state = {
   historyItems: []
 };
 
+let cloudRestoredUserId = "";
+
 init();
 
 function init() {
@@ -50,10 +52,12 @@ function init() {
       analyzeText();
     }
   });
+  window.addEventListener("cbst:authchange", () => void restoreCloudRecords());
   renderFeaturedList();
   renderHistoryList();
   renderFeaturedAction();
   void detectConnection();
+  void restoreCloudRecords();
 }
 
 async function detectConnection() {
@@ -289,6 +293,7 @@ function saveDraft() {
     analysis: state.currentAnalysis,
     updatedAt: new Date().toISOString()
   });
+  void syncCloudRecords();
 }
 
 function saveAnalysisToHistory() {
@@ -302,6 +307,7 @@ function saveAnalysisToHistory() {
   };
   state.historyItems = [item, ...state.historyItems.filter((historyItem) => historyItem.id !== id)].slice(0, MAX_HISTORY_ITEMS);
   writeLocalJson(HISTORY_STORAGE_KEY, state.historyItems);
+  void syncCloudRecords();
 }
 
 function loadHistoryItems() {
@@ -353,6 +359,7 @@ function clearLocalRecords() {
   removeLocalValue(FEATURED_STORAGE_KEY);
   removeLocalValue(HISTORY_STORAGE_KEY);
   removeLocalValue(DRAFT_STORAGE_KEY);
+  void window.CBSTCloud?.removeProgress("cognitive");
   elements.results.innerHTML = '<div class="empty-state">输入文本后点击“分析文本”。结果会优先引用原句证据，而不是对说话者下判断。</div>';
   elements.resultCount.textContent = "等待分析";
   renderFeaturedList();
@@ -368,6 +375,57 @@ function loadFeaturedItems() {
 
 function persistFeaturedItems() {
   writeLocalJson(FEATURED_STORAGE_KEY, state.featuredItems);
+  void syncCloudRecords();
+}
+
+async function restoreCloudRecords() {
+  const user = window.CBSTCloud?.getUser?.();
+  if (!user || cloudRestoredUserId === user.id) return;
+  cloudRestoredUserId = user.id;
+
+  try {
+    const cloudPayload = await window.CBSTCloud.loadProgress("cognitive");
+    if (!cloudPayload) {
+      await syncCloudRecords();
+      return;
+    }
+    const draft = cloudPayload.draft || {};
+    state.featuredItems = Array.isArray(cloudPayload.featuredItems)
+      ? cloudPayload.featuredItems.filter(isValidFeaturedItem).slice(0, MAX_FEATURED_ITEMS)
+      : [];
+    state.historyItems = Array.isArray(cloudPayload.historyItems)
+      ? cloudPayload.historyItems.filter(isValidHistoryItem).slice(0, MAX_HISTORY_ITEMS)
+      : [];
+    elements.editor.textContent = typeof draft.text === "string" ? draft.text : "";
+    state.currentText = elements.editor.textContent;
+    state.currentAnalysis = draft.analysis && state.currentText ? draft.analysis : null;
+    if (state.currentAnalysis) renderResults(state.currentAnalysis);
+    writeLocalJson(FEATURED_STORAGE_KEY, state.featuredItems);
+    writeLocalJson(HISTORY_STORAGE_KEY, state.historyItems);
+    writeLocalJson(DRAFT_STORAGE_KEY, draft);
+    renderFeaturedList();
+    renderHistoryList();
+    renderFeaturedAction();
+  } catch {
+    cloudRestoredUserId = "";
+  }
+}
+
+async function syncCloudRecords() {
+  if (!window.CBSTCloud?.isSignedIn?.()) return;
+  try {
+    await window.CBSTCloud.saveProgress("cognitive", {
+      draft: {
+        text: state.currentText || getEditorText(),
+        analysis: state.currentAnalysis,
+        updatedAt: new Date().toISOString()
+      },
+      featuredItems: state.featuredItems,
+      historyItems: state.historyItems
+    });
+  } catch {
+    // Local records are retained and will sync on a later successful save.
+  }
 }
 
 function isValidFeaturedItem(item) {

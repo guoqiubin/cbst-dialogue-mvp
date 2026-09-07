@@ -223,6 +223,121 @@ button {
   transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
 }
 
+.account-button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(42, 38, 32, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.72);
+  color: var(--deep);
+  cursor: pointer;
+  font: inherit;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.account-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(232, 93, 78, 0.52);
+}
+
+.account-button.signed-in {
+  border-color: rgba(62, 120, 100, 0.34);
+  background: rgba(220, 239, 230, 0.76);
+}
+
+.account-dialog {
+  width: min(92vw, 480px);
+  padding: 0;
+  border: 0;
+  border-radius: 28px;
+  background: transparent;
+  color: var(--deep);
+}
+
+.account-dialog::backdrop {
+  background: rgba(42, 38, 32, 0.42);
+  backdrop-filter: blur(5px);
+}
+
+.account-dialog-card {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  padding: 32px;
+  border: 1px solid rgba(196, 184, 165, 0.9);
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(248, 232, 220, 0.96));
+  box-shadow: 0 24px 64px rgba(42, 38, 32, 0.28);
+}
+
+.account-dialog-card h2,
+.account-dialog-card p {
+  margin: 0;
+}
+
+.dialog-close-button {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(42, 38, 32, 0.08);
+  color: var(--deep);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.account-dialog-copy,
+.account-disclaimer,
+.account-status {
+  color: var(--ink-soft);
+  line-height: 1.65;
+}
+
+.account-form-fields {
+  display: grid;
+  gap: 13px;
+}
+
+.account-form-fields label {
+  display: grid;
+  gap: 7px;
+  color: var(--deep);
+  font-weight: 700;
+}
+
+.account-form-fields input {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: rgba(255, 253, 248, 0.88);
+  color: var(--deep);
+  font: inherit;
+}
+
+.account-signed-in {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid rgba(62, 120, 100, 0.24);
+  border-radius: 16px;
+  background: rgba(220, 239, 230, 0.56);
+}
+
+.account-status.success {
+  color: #256b55;
+}
+
+.account-status.error {
+  color: var(--danger);
+}
+
 .manual-link-icon {
   display: inline-grid;
   place-items: center;
@@ -231,6 +346,33 @@ button {
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.8);
   font-size: 14px;
+}
+
+.academy-brand {
+  display: inline-grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 76px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: transform 140ms ease, color 140ms ease;
+}
+
+.academy-brand img {
+  width: 42px;
+  height: 42px;
+  border: 2px solid rgba(255, 253, 248, 0.88);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 6px 16px rgba(42, 38, 32, 0.14);
+}
+
+.academy-brand:hover {
+  color: var(--deep);
+  transform: translateY(-2px);
 }
 
 .panel {
@@ -360,11 +502,8 @@ button {
 }
 
 .connection-banner {
-  margin-top: 18px;
-  padding: 13px 15px;
-  border-radius: 16px;
-  border: 1px solid transparent;
-  line-height: 1.6;
+  /* Connection diagnostics remain available to the app, not the learner UI. */
+  display: none;
 }
 
 .connection-banner.checking {
@@ -1089,6 +1228,233 @@ button {
   color: var(--ink-soft);
 }
 
+.logic-training-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.7fr) minmax(0, 1.3fr);
+  gap: 20px;
+  margin-top: 20px;
+  align-items: start;
+}
+
+.training-control-panel {
+  position: sticky;
+  top: 18px;
+}
+
+.training-field-row {
+  margin-top: 20px;
+}
+
+.training-actions {
+  margin-top: 18px;
+}
+
+.logic-question-card {
+  margin-top: 20px;
+  padding: clamp(24px, 4vw, 44px);
+  border: 1px solid rgba(42, 38, 32, 0.16);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(232, 93, 78, 0.11), rgba(255, 253, 248, 0.72) 48%, rgba(196, 184, 165, 0.32));
+  color: var(--ink);
+  font-family: "Fraunces", "Iowan Old Style", Georgia, "Songti SC", serif;
+  font-size: clamp(24px, 3.1vw, 38px);
+  font-weight: 700;
+  line-height: 1.42;
+  letter-spacing: -0.025em;
+}
+
+.logic-answer-area {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px dashed var(--line);
+}
+
+.logic-answer-area.hidden,
+.logic-feedback-view.hidden {
+  display: none;
+}
+
+.logic-answer-label {
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+
+.logic-answer-label span {
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.logic-option-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.logic-choice {
+  position: relative;
+  cursor: pointer;
+}
+
+.logic-choice input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+}
+
+.logic-choice span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.58);
+  color: var(--ink);
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.logic-choice:hover span {
+  transform: translateY(-1px);
+  border-color: rgba(232, 93, 78, 0.56);
+}
+
+.logic-choice input:checked + span {
+  border-color: #E85D4E;
+  background: #E85D4E;
+  color: #FFF9F3;
+  box-shadow: 0 8px 18px rgba(232, 93, 78, 0.2);
+}
+
+.logic-choice input:focus-visible + span {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.logic-response-input {
+  min-height: 122px;
+  margin-top: 0;
+}
+
+.logic-feedback-view {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.76);
+}
+
+.logic-feedback-view.excellent {
+  border-color: rgba(62, 113, 75, 0.38);
+  background: rgba(224, 239, 224, 0.68);
+}
+
+.logic-feedback-view.improvable {
+  border-color: rgba(208, 133, 47, 0.46);
+  background: rgba(255, 239, 206, 0.72);
+}
+
+.logic-feedback-view.rethink {
+  border-color: rgba(232, 93, 78, 0.48);
+  background: rgba(255, 230, 225, 0.72);
+}
+
+.feedback-level-head,
+.course-reference,
+.strategy-item > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.feedback-level-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.feedback-level-badge.excellent {
+  background: #3E714B;
+}
+
+.feedback-level-badge.improvable {
+  background: #B87722;
+}
+
+.feedback-level-badge.rethink {
+  background: #E85D4E;
+}
+
+.logic-feedback-view h3 {
+  margin: 16px 0 8px;
+  font-size: 24px;
+}
+
+.feedback-summary,
+.feedback-block p,
+.strategy-item p,
+.course-reference span {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.75;
+}
+
+.feedback-block,
+.strategy-map,
+.course-reference {
+  margin-top: 18px;
+}
+
+.feedback-block strong,
+.strategy-map > strong,
+.course-reference strong {
+  display: block;
+  margin-bottom: 7px;
+}
+
+.strategy-map-list {
+  display: grid;
+  gap: 10px;
+}
+
+.strategy-item {
+  padding: 13px 14px;
+  border: 1px solid rgba(42, 38, 32, 0.13);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.54);
+}
+
+.strategy-item.selected {
+  border-color: rgba(232, 93, 78, 0.45);
+}
+
+.strategy-item p {
+  margin-top: 8px;
+}
+
+.selected-note {
+  color: #9B3E32;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.course-reference {
+  padding-top: 16px;
+  border-top: 1px dashed rgba(42, 38, 32, 0.16);
+}
+
+.course-reference strong {
+  margin: 0;
+}
+
 .restore-history-button {
   flex: 0 0 auto;
   min-height: 38px;
@@ -1162,6 +1528,14 @@ select:disabled {
     grid-template-columns: 1fr;
   }
 
+  .logic-training-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .training-control-panel {
+    position: static;
+  }
+
   .cognitive-workbench,
   .cognitive-result-panel {
     min-height: 0;
@@ -1202,6 +1576,10 @@ select:disabled {
 
   .module-rail {
     width: 100%;
+  }
+
+  .academy-brand {
+    justify-self: start;
   }
 
   .panel {

@@ -58,6 +58,21 @@ npm run check
 
 默认模型当前写死为 `gpt-5.6-terra`，也可以通过 `OPENAI_MODEL` 覆盖。
 
+## 账号与云端进度
+
+生产环境使用 Supabase Auth 提供邮箱和密码登录，应用不处理用户密码。登录后会同步 CBST 对话、认知谬误识别和逻辑字词训练的进度。
+
+在 Vercel 的 Production 与 Preview 环境中配置：
+
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY`
+
+不要提交 `.env`，不要在聊天中传递 `OPENAI_API_KEY`、数据库密码或 Supabase 服务端密钥。`SUPABASE_PUBLISHABLE_KEY` 仅用于浏览器访问，其安全性由数据库行级权限策略保证。
+
+数据库迁移位于 `supabase/migrations/`。创建 Supabase 项目并关联 GitHub 后，推送迁移即可部署数据表与权限规则。
+
 ### 方式 2：其他支持 Node Serverless 的平台
 
 前提是平台既能托管静态文件，也能运行 `api/chat.js`。

@@ -6,6 +6,6 @@
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js",
-    "check": "node --check server.js && node --check app.js && node --check cognitive.js && node --check api/chat.js"
+    "check": "node --check server.js && node --check app.js && node --check cognitive.js && node --check logic-training.js && node --check cloud-store.js && node --check api/chat.js && node --check api/status.js && node --check api/public-config.js"
   }
 }

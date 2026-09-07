@@ -66,6 +66,8 @@ const state = {
   }
 };
 
+let cloudRestoredUserId = "";
+
 const elements = {
   sceneSelect: document.querySelector("#scene-select"),
   aiRoleSelect: document.querySelector("#ai-role-select"),
@@ -110,7 +112,9 @@ function init() {
   renderComposer();
   renderConversation();
   bindEvents();
+  window.addEventListener("cbst:authchange", () => void restoreCloudDialogue());
   void detectConnection();
+  void restoreCloudDialogue();
 }
 
 function bindEvents() {
@@ -214,6 +218,7 @@ function persistMemory() {
     userRoleOptions: state.roleOptions.userRoles,
     eventText: getEditorText()
   });
+  void syncCloudDialogue();
 }
 
 function restoreMemory() {
@@ -228,6 +233,7 @@ function restoreMemory() {
 
 function resetMemoryAndForm() {
   safeRemoveMemory(MEMORY_KEY);
+  void window.CBSTCloud?.removeProgress("dialogue");
   state.config = null;
   state.generatedCase = null;
   state.transcript = [];
@@ -250,6 +256,71 @@ function resetMemoryAndForm() {
   renderComposer();
   renderConversation();
   renderValidationPanel();
+}
+
+async function restoreCloudDialogue() {
+  const user = window.CBSTCloud?.getUser?.();
+  if (!user || cloudRestoredUserId === user.id) return;
+  cloudRestoredUserId = user.id;
+  try {
+    const payload = await window.CBSTCloud.loadProgress("dialogue");
+    if (!payload) {
+      await syncCloudDialogue();
+      return;
+    }
+    elements.sceneSelect.value = payload.scene || "parent-child";
+    state.roleOptions = buildRoleOptions(elements.sceneSelect.value, payload);
+    renderRoleSelects();
+    elements.aiRoleSelect.value = state.roleOptions.aiRoles.includes(payload.aiRole)
+      ? payload.aiRole
+      : state.roleOptions.aiRoles[0] || "";
+    elements.userRoleSelect.value = state.roleOptions.userRoles.includes(payload.userRole)
+      ? payload.userRole
+      : state.roleOptions.userRoles[0] || "";
+    setEditorText(payload.eventText || "");
+    state.config = payload.config || null;
+    state.generatedCase = payload.generatedCase || null;
+    state.transcript = Array.isArray(payload.transcript) ? payload.transcript : [];
+    state.finished = Boolean(payload.finished);
+    state.evaluation = payload.evaluation || null;
+    state.hintExpanded = false;
+    state.allowForceSubmit = false;
+    renderCaseCard();
+    renderComposer();
+    renderConversation();
+    renderEvaluation();
+    safeSetMemory(MEMORY_KEY, {
+      scene: elements.sceneSelect.value,
+      aiRole: elements.aiRoleSelect.value,
+      userRole: elements.userRoleSelect.value,
+      aiRoleOptions: state.roleOptions.aiRoles,
+      userRoleOptions: state.roleOptions.userRoles,
+      eventText: getEditorText()
+    });
+  } catch {
+    cloudRestoredUserId = "";
+  }
+}
+
+async function syncCloudDialogue() {
+  if (!window.CBSTCloud?.isSignedIn?.()) return;
+  try {
+    await window.CBSTCloud.saveProgress("dialogue", {
+      scene: elements.sceneSelect.value,
+      aiRole: elements.aiRoleSelect.value,
+      userRole: elements.userRoleSelect.value,
+      aiRoleOptions: state.roleOptions.aiRoles,
+      userRoleOptions: state.roleOptions.userRoles,
+      eventText: getEditorText(),
+      config: state.config,
+      generatedCase: state.generatedCase,
+      transcript: state.transcript,
+      finished: state.finished,
+      evaluation: state.evaluation
+    });
+  } catch {
+    // The local draft remains available and a later save retries cloud sync.
+  }
 }
 
 async function handleGenerateCase(event) {
@@ -293,6 +364,7 @@ async function handleGenerateCase(event) {
     renderComposer();
     renderConversation();
     renderValidationPanel();
+    persistMemory();
   } catch (error) {
     showStatus(error.message || "生成案例失败，请稍后再试。", "error");
   } finally {
@@ -354,6 +426,7 @@ async function continueDialogue(reply) {
     elements.responseInput.value = "";
     renderConversation();
     renderComposer();
+    persistMemory();
   } catch (error) {
     state.transcript.pop();
     renderConversation();
@@ -384,6 +457,7 @@ async function endDialogue() {
     markConnectionLive("模型已连通，当前对话正在使用真实生成。");
     state.finished = true;
     state.evaluation = result.evaluation;
+    persistMemory();
     showStatus("点评已生成。", "success");
     renderComposer();
     renderEvaluation();

@@ -1,6 +1,10 @@
 "use strict";
 
+const fs = require("node:fs");
+const path = require("node:path");
+
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || "gpt-5.6-terra";
+const KNOWLEDGE_BASE_PATH = path.join(__dirname, "..", "knowledge-base", "cbst-core.json");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -33,6 +37,16 @@ module.exports = async function handler(req, res) {
     if (body.action === "analyze_fallacies") {
       const payload = await analyzeFallacies(apiKey, body.text || "");
       return res.status(200).json({ analysis: payload, model: DEFAULT_MODEL });
+    }
+
+    if (body.action === "generate_logic_question") {
+      const payload = await generateLogicQuestion(apiKey, body.config || {});
+      return res.status(200).json({ question: payload, model: DEFAULT_MODEL });
+    }
+
+    if (body.action === "evaluate_logic_answer") {
+      const payload = await evaluateLogicAnswer(apiKey, body.question || {}, body.answer || {});
+      return res.status(200).json({ evaluation: payload, model: DEFAULT_MODEL });
     }
 
     return res.status(400).json({ error: "Unsupported action" });
@@ -169,6 +183,251 @@ ${formatTranscript(transcript)}
 `;
 
   return callJsonResponse(apiKey, prompt, schema, 1800);
+}
+
+const LOGIC_LABELS = [
+  "一些/所有",
+  "或许/一定",
+  "之前/之后",
+  "现在/以后",
+  "是/不是",
+  "和/或者",
+  "如果/那么",
+  "为什么/因为",
+  "想要/必要",
+  "与…有关",
+  "公平/不公平"
+];
+
+const LOGIC_TRAINING_SCENES = ["亲子", "校园", "亲密关系", "职场", "家庭"];
+const LOGIC_TRAINING_DIFFICULTIES = ["入门", "进阶", "困难"];
+
+// Course material defines the intervention rules. These pools keep the life events broad.
+const LOGIC_TRAINING_TOPICS = {
+  "亲子": [
+    "作业安排", "屏幕使用", "回家时间", "家务分工", "零花钱", "成绩反馈",
+    "兴趣选择", "房间整理", "隐私边界", "同伴来往", "早餐与作息", "外出计划"
+  ],
+  "校园": [
+    "考试成绩", "小组作业", "同学误会", "老师批评", "课堂发言", "社团选择",
+    "朋友疏远", "座位安排", "竞赛落选", "请假缺课", "外貌比较", "网络消息"
+  ],
+  "亲密关系": [
+    "回复消息", "周末安排", "朋友边界", "共同消费", "家务分工", "迟到失约",
+    "见家人安排", "社交媒体", "独处需要", "旅行计划", "纪念日期待", "工作忙碌"
+  ],
+  "职场": [
+    "临时任务", "反馈修改", "会议发言", "工作分工", "加班安排", "晋升机会",
+    "同事协作", "项目延期", "请假沟通", "职责边界", "客户投诉", "工作失误"
+  ],
+  "家庭": [
+    "家务分工", "照顾长辈", "家庭开支", "节日安排", "生活习惯", "个人隐私",
+    "兄弟姐妹比较", "购房决定", "育儿分歧", "探亲频率", "宠物照料", "搬家计划"
+  ]
+};
+
+async function generateLogicQuestion(apiKey, config) {
+  const scene = normalizeTrainingOption(config.scene, ["亲子", "校园", "亲密关系", "职场", "家庭", "随机"], "随机");
+  const difficulty = normalizeTrainingOption(config.difficulty, ["入门", "进阶", "困难", "随机"], "随机");
+  const actualScene = scene === "随机"
+    ? LOGIC_TRAINING_SCENES[Math.floor(Math.random() * LOGIC_TRAINING_SCENES.length)]
+    : scene;
+  const actualDifficulty = difficulty === "随机"
+    ? LOGIC_TRAINING_DIFFICULTIES[Math.floor(Math.random() * LOGIC_TRAINING_DIFFICULTIES.length)]
+    : difficulty;
+  const recentQuestions = normalizeRecentLogicQuestions(config.recentQuestions);
+  const recentTopics = new Set(recentQuestions.map((item) => item.topic).filter(Boolean));
+  const topics = LOGIC_TRAINING_TOPICS[actualScene] || LOGIC_TRAINING_TOPICS["校园"];
+  const unusedTopics = topics.filter((topic) => !recentTopics.has(topic));
+  const availableTopics = unusedTopics.length ? unusedTopics : topics;
+  const selectedTopic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
+  const knowledge = getKnowledgeContext("logic-training", `${actualScene} ${actualDifficulty}`, 6);
+  const schema = {
+    sentence: "一句自然的中文生活化表达，不带角色名或引号",
+    scene: "实际使用的场景，只能是亲子、校园、亲密关系、职场或家庭",
+    difficulty: "实际使用的难度，只能是入门、进阶或困难"
+  };
+  const prompt = `
+你是 CBST（认知行为社会训练）轻量练习的出题教练。
+
+任务：生成一句适合用户判断 CBST 逻辑字词策略的、生活化的真实表达。
+课程知识只用于判断 CBST 的逻辑规则，不能限制或复用生活事件。
+
+严格规则：
+1. 只输出一句人物会真实说出的中文话，长度 12 至 45 字；不要角色名、解释、引号、建议或答案。
+2. 这句话必须至少可以用下列一个或多个 CBST 逻辑字词进行有效回应：${LOGIC_LABELS.join("、")}。
+3. 不要把答案或可用逻辑字词泄露在 sentence 中，也不要在任何字段中提供提示。
+4. 句子可以表达绝对化、模糊化、人格化、无选择感、僵化要求或关系边界冲突，但避免羞辱、诊断、极端暴力或自伤内容。
+5. 本题必须围绕指定生活主题“${selectedTopic}”生成，不得替换为其他主题。
+6. 不得复用课程案例中的人物、事件、措辞或句式；也不要默认生成“没陪伴/不在乎”的关系主题。
+7. 当用户选择“随机”时，自行选择一个合适的真实场景或难度；否则严格遵守指定参数。
+8. 入门：通常有 1 至 2 条清晰可行的逻辑路径；进阶：存在 2 至 3 条不同路径；困难：需要先接住情绪，再从多个合理路径中做判断。
+
+用户参数：
+- 场景：${actualScene}
+- 难度：${actualDifficulty}
+- 本题指定生活主题：${selectedTopic}
+- 本次出题随机标识：${Date.now()}
+
+本轮已出现的题目（禁止重复、换词改写或沿用相近事件）：
+${formatRecentLogicQuestions(recentQuestions)}
+
+课程知识：
+${knowledge.context}
+`;
+
+  const payload = await callJsonResponse(apiKey, prompt, schema, 700);
+  return {
+    sentence: cleanAnalysisText(payload.sentence, 120),
+    scene: actualScene,
+    difficulty: actualDifficulty,
+    topic: selectedTopic
+  };
+}
+
+function normalizeRecentLogicQuestions(value) {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 18).map((item) => ({
+    sentence: cleanAnalysisText(item?.sentence, 120),
+    topic: cleanAnalysisText(item?.topic, 30)
+  })).filter((item) => item.sentence);
+}
+
+function formatRecentLogicQuestions(recentQuestions) {
+  if (!recentQuestions.length) return "（本轮尚未生成题目）";
+  return recentQuestions.map((item) => `- 主题：${item.topic || "未标注"}；句子：${item.sentence}`).join("\n");
+}
+
+async function evaluateLogicAnswer(apiKey, question, answer) {
+  const sentence = cleanAnalysisText(question.sentence, 160);
+  if (!sentence) throw new Error("题目缺失，请重新生成一句训练题。");
+
+  const selectedLogic = Array.isArray(answer.selectedLogic)
+    ? answer.selectedLogic.filter((label) => LOGIC_LABELS.includes(label)).slice(0, 5)
+    : [];
+  if (!selectedLogic.length) throw new Error("请至少选择一种逻辑字词后再提交。");
+
+  const responseText = cleanAnalysisText(answer.responseText, 500);
+  const knowledge = getKnowledgeContext("logic-training", `${sentence} ${selectedLogic.join(" ")}`, 8);
+  const schema = {
+    level: "excellent | improvable | rethink",
+    headline: "一句简短、非诊断式的反馈标题",
+    summary: "不超过两句的整体点评",
+    selectedFeedback: "评价用户所选逻辑字词是否贴合",
+    responseFeedback: "用户未填写回应时为空字符串；填写时点评是否自然、共情且体现策略",
+    strategyMap: [
+      {
+        logicLabel: "只能使用允许的逻辑字词标签",
+        reason: "该策略如何回应题目句子",
+        selectedByUser: true
+      }
+    ],
+    courseReferences: ["面向用户展示的简短课程依据"]
+  };
+  const prompt = `
+你是严格但不诊断的 CBST 逻辑字词训练点评教练。请评估用户如何回应一道单句训练题。
+
+训练题：${sentence}
+题目场景：${cleanAnalysisText(question.scene, 20)}
+题目难度：${cleanAnalysisText(question.difficulty, 20)}
+用户选择的逻辑字词：${selectedLogic.join("、")}
+用户可选回应：${responseText || "（未填写）"}
+
+必须遵守：
+1. 不存在唯一正确答案；判断是否能帮助对方从笼统、绝对化、人格化或无选择感的表达回到更具体、可讨论、可行动的状态。
+2. level 只能是 excellent、improvable 或 rethink。excellent 表示策略贴合且回应自然；improvable 表示策略可成立但不够具体、自然或完整；rethink 表示所选策略与题目关系弱，或回应明显评价、否定感受、强迫对方。
+3. 策略地图 strategyMap 必须包含用户选中的有效策略，也要补充其他合理策略；最多 4 项。每项只能使用下列标签：${LOGIC_LABELS.join("、")}。同义或重复策略只保留一个。
+4. 用户没写回应时，responseFeedback 必须为空字符串，不要因此降低 level。
+5. 用户写了回应时，重点看它是否自然、是否先接住情绪、是否体现所选逻辑；不要要求固定句式。
+6. 所有表述用柔化教育语气，不评判用户人格。
+7. courseReferences 只返回 1 至 3 条来自课程知识中的 citationLabel，不要杜撰来源。
+
+课程知识：
+${knowledge.context}
+`;
+
+  const payload = await callJsonResponse(apiKey, prompt, schema, 1300);
+  return normalizeLogicEvaluation(payload, selectedLogic, knowledge.references, Boolean(responseText));
+}
+
+function normalizeLogicEvaluation(payload, selectedLogic, references, hasResponse) {
+  const level = ["excellent", "improvable", "rethink"].includes(payload?.level) ? payload.level : "improvable";
+  const seen = new Set();
+  const strategyMap = (Array.isArray(payload?.strategyMap) ? payload.strategyMap : [])
+    .filter((item) => item && LOGIC_LABELS.includes(item.logicLabel))
+    .filter((item) => {
+      if (seen.has(item.logicLabel)) return false;
+      seen.add(item.logicLabel);
+      return true;
+    })
+    .slice(0, 4)
+    .map((item) => ({
+      logicLabel: item.logicLabel,
+      reason: cleanAnalysisText(item.reason, 160),
+      selectedByUser: selectedLogic.includes(item.logicLabel)
+    }));
+
+  for (const label of selectedLogic) {
+    if (seen.has(label) || strategyMap.length >= 4) continue;
+    strategyMap.unshift({ logicLabel: label, reason: "这是你选择的策略；可结合题目中的具体表达进一步展开。", selectedByUser: true });
+    seen.add(label);
+  }
+
+  return {
+    level,
+    headline: cleanAnalysisText(payload?.headline, 90) || levelHeadline(level),
+    summary: cleanAnalysisText(payload?.summary, 260) || "你的选择已经形成了一条可讨论的回应路径，下面可继续比较其他合理策略。",
+    selectedFeedback: cleanAnalysisText(payload?.selectedFeedback, 220),
+    responseFeedback: hasResponse ? cleanAnalysisText(payload?.responseFeedback, 220) : "",
+    strategyMap,
+    courseReferences: normalizeReferences(payload?.courseReferences, references)
+  };
+}
+
+function levelHeadline(level) {
+  if (level === "excellent") return "你的策略与这句话的核心表达较贴合。";
+  if (level === "rethink") return "这条路径与题目还不够贴合，可以换一个角度试试。";
+  return "你的策略可以成立，再具体一点会更有力量。";
+}
+
+function normalizeReferences(value, fallback) {
+  const allowed = new Set(fallback);
+  const items = Array.isArray(value) ? value.filter((item) => allowed.has(item)).slice(0, 3) : [];
+  return items.length ? items : fallback.slice(0, 2);
+}
+
+function normalizeTrainingOption(value, allowed, fallback) {
+  return allowed.includes(value) ? value : fallback;
+}
+
+function getKnowledgeContext(module, query, limit) {
+  const entries = loadKnowledgeEntries().filter((entry) => Array.isArray(entry.modules) && entry.modules.includes(module));
+  const terms = String(query || "").toLowerCase().split(/[\s，、。；：！？]+/).filter(Boolean);
+  const ranked = entries
+    .map((entry) => ({
+      entry,
+      score: terms.reduce((score, term) => {
+        const searchable = `${entry.section} ${(entry.topics || []).join(" ")} ${entry.rule} ${entry.example}`.toLowerCase();
+        return score + (searchable.includes(term) ? 1 : 0);
+      }, 0)
+    }))
+    .sort((left, right) => right.score - left.score)
+    .slice(0, Math.max(1, limit));
+  const selected = ranked.map((item) => item.entry);
+  return {
+    context: selected.map((entry) => `来源：${entry.source}\n章节：${entry.section}\n规则：${entry.rule}\n案例：${entry.example}`).join("\n\n"),
+    references: [...new Set(selected.map((entry) => entry.citationLabel).filter(Boolean))]
+  };
+}
+
+function loadKnowledgeEntries() {
+  try {
+    const raw = fs.readFileSync(KNOWLEDGE_BASE_PATH, "utf8");
+    const data = JSON.parse(raw);
+    return Array.isArray(data.entries) ? data.entries : [];
+  } catch {
+    return [];
+  }
 }
 
 const FALLACY_CATALOG = [

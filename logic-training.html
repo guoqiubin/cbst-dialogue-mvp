@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CBST 逻辑字词训练 | CBST 训练器</title>
+    <meta name="description" content="一句话 CBST 逻辑字词训练：无提示判断策略，可选补写回应，获得课程依据和可行策略地图。" />
+    <link rel="stylesheet" href="./styles.css?v=20260907a" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">轻量练习</p>
+          <h1>CBST 逻辑字词训练</h1>
+          <p class="hero-copy">每次只练一句话。先独立判断可用的逻辑字词，再选择是否写下回应；提交后查看不同策略如何打开对话。</p>
+        </div>
+        <div class="hero-badge">
+          <span>无提示作答</span>
+          <strong>一句话，一次判断</strong>
+          <small>答案不唯一，重点是策略是否贴合</small>
+        </div>
+      </header>
+
+      <section class="module-hub" aria-label="训练模块体系">
+        <div class="module-hub-copy">
+          <p class="eyebrow">技能模块</p>
+          <strong>请选择训练模块</strong>
+        </div>
+        <div class="module-hub-actions">
+          <nav class="module-rail">
+            <a class="module-link" href="./cognitive.html">认知谬误识别</a>
+            <a class="module-link" href="./index.html">CBST对话</a>
+            <a class="module-link active" href="./logic-training.html" aria-current="page">逻辑字词训练</a>
+            <a class="module-link" href="./empathy.html">共情训练</a>
+            <a class="module-link" href="./listening.html">倾听训练</a>
+          </nav>
+          <a class="manual-link" href="./manual.html" aria-label="打开 CBST 对话法使用手册"><span class="manual-link-icon" aria-hidden="true">📘</span><span>使用手册</span></a>
+          <a class="academy-brand" href="./index.html" aria-label="托德学院出品，返回训练首页">
+            <img src="./assets/todd-academy-logo.jpg" alt="托德学院标识" />
+            <span>托德学院出品</span>
+          </a>
+        </div>
+      </section>
+
+      <main class="logic-training-layout">
+        <section class="panel training-control-panel interactive-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">设置练习</p>
+              <h2>选择训练方向</h2>
+            </div>
+          </div>
+          <div id="logic-connection-banner" class="connection-banner checking">正在检查模型连接状态...</div>
+          <div class="field-row training-field-row">
+            <div class="field-group">
+              <label for="logic-scene-select">场景</label>
+              <select id="logic-scene-select" class="field-control">
+                <option value="随机">随机</option>
+                <option value="亲子">亲子</option>
+                <option value="校园">校园</option>
+                <option value="亲密关系">亲密关系</option>
+                <option value="职场">职场</option>
+                <option value="家庭">家庭</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="logic-difficulty-select">难度</label>
+              <select id="logic-difficulty-select" class="field-control">
+                <option value="随机">随机</option>
+                <option value="入门">入门</option>
+                <option value="进阶">进阶</option>
+                <option value="困难">困难</option>
+              </select>
+            </div>
+          </div>
+          <p class="input-note">生成后不会显示任何逻辑字词提示，请先凭自己的判断作答。</p>
+          <div class="action-row training-actions">
+            <button id="generate-logic-question-button" class="primary-button" type="button">生成一句训练题</button>
+          </div>
+          <div id="logic-status-box" class="status-box hidden" aria-live="polite"></div>
+        </section>
+
+        <section class="panel training-workspace-panel interactive-panel" aria-live="polite">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">当前题目</p>
+              <h2>你会怎样回应？</h2>
+            </div>
+            <span id="logic-question-meta" class="turn-indicator">等待出题</span>
+          </div>
+
+          <div id="logic-question-card" class="logic-question-card empty-state">请选择场景和难度后，点击“生成一句训练题”。</div>
+
+          <div id="logic-answer-area" class="logic-answer-area hidden">
+            <p class="logic-answer-label">选择你认为可以使用的逻辑字词</p>
+            <div id="logic-option-grid" class="logic-option-grid"></div>
+            <p class="logic-answer-label">补写一句回应 <span>可选</span></p>
+            <textarea id="logic-response-input" class="response-input logic-response-input" rows="4" placeholder="可选：写下你会如何回应。不要追求标准答案，写出自然的第一句话即可。"></textarea>
+            <div class="action-row training-actions">
+              <button id="submit-logic-answer-button" class="primary-button" type="button" disabled>提交判断</button>
+              <button id="next-logic-question-button" class="secondary-button" type="button" disabled>下一题</button>
+            </div>
+          </div>
+
+          <div id="logic-feedback-view" class="logic-feedback-view hidden"></div>
+        </section>
+      </main>
+    </div>
+    <script src="./cloud-store.js?v=20260907a"></script>
+    <script src="./logic-training.js?v=20260907a"></script>
+  </body>
+</html>

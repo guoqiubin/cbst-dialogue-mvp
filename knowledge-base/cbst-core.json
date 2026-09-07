@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0",
+  "entries": [
+    {
+      "id": "cbst-partial-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "部分逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["一些/所有", "或许/一定", "绝对化表达"],
+      "rule": "当表达把局部挫折扩大成全部、永远或一定时，优先用“一些/所有”或“或许/一定”把整体判断拆回局部事实。",
+      "example": "“班里的人都不喜欢我”可先讨论：是所有同学，还是一些同学？",
+      "citationLabel": "CBST 对话法课件｜部分逻辑"
+    },
+    {
+      "id": "cbst-time-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "时间逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["之前/之后", "现在/以后", "变化过程"],
+      "rule": "当表达将当前困难说成永久状态时，使用“之前/之后”或“现在/以后”区分当下状态和未来可能，让变化变得可讨论。",
+      "example": "“我数学就是不行”可追问：是现在这次不顺，还是以后也一定不行？",
+      "citationLabel": "CBST 对话法课件｜时间逻辑"
+    },
+    {
+      "id": "cbst-definition-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "是非逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["是/不是", "相同/不同", "定义与边界"],
+      "rule": "当双方对一个词或一件事的含义混在一起时，使用“是/不是”或“相同/不同”澄清定义、事实和边界。",
+      "example": "“你不陪我就是不爱我”可先区分：不陪伴这一次，是否等同于不爱？",
+      "citationLabel": "CBST 对话法课件｜是非逻辑"
+    },
+    {
+      "id": "cbst-choice-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "选择逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["和/或者", "是/还是", "选项"],
+      "rule": "当表达把处境说成无路可走时，使用“和/或者”或“是/还是”帮助看见不止一个选项。",
+      "example": "面对任务压力，可讨论是先做最关键部分，还是先与领导重新确认优先级。",
+      "citationLabel": "CBST 对话法课件｜选择逻辑"
+    },
+    {
+      "id": "cbst-cause-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "因果逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["为什么/因为", "原因", "具体事实"],
+      "rule": "在急着评价或解决前，使用“为什么/因为”理解触发因素、原因和具体困难。",
+      "example": "“我不想去学校了”可先询问：是什么让你现在这么不想去？",
+      "citationLabel": "CBST 对话法课件｜因果逻辑"
+    },
+    {
+      "id": "cbst-necessary-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "必要逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["想要/必要", "必须", "僵化要求"],
+      "rule": "当表达把愿望、偏好或高标准说成唯一必要条件时，使用“想要/必要”区分愿望与必须，减少僵化要求。",
+      "example": "“我必须每次都考第一”可讨论：考第一是想要，还是每次都必要？",
+      "citationLabel": "CBST 对话法课件｜必要逻辑"
+    },
+    {
+      "id": "cbst-related-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "相关逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["与…有关", "人格分离", "事件"],
+      "rule": "当表达把一次事件等同于个人价值或能力时，使用“与…有关”把具体问题与人格标签分开。",
+      "example": "“我数学不行，所以我很笨”可讨论：这次数学困难与哪些知识点或学习方式有关？",
+      "citationLabel": "CBST 对话法课件｜相关逻辑"
+    },
+    {
+      "id": "cbst-fairness-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "公平逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["公平/不公平", "尊重", "边界"],
+      "rule": "当冲突涉及关系中的尊重、规则或边界时，使用“公平/不公平”帮助讨论双方期待，而不是直接攻击人格。",
+      "example": "当一方总被临时要求承担额外任务时，可讨论这样的分配是否公平。",
+      "citationLabel": "CBST 对话法课件｜公平逻辑"
+    },
+    {
+      "id": "cbst-action-logic",
+      "source": "CBST-认知行为社会训练（泰国西那瓦）课件",
+      "section": "假设逻辑",
+      "modules": ["cbst-dialogue", "logic-training"],
+      "topics": ["如果/那么", "后果", "行动"],
+      "rule": "在事实和感受被拆清后，使用“如果/那么”推演选择的后果，并讨论下一步行动。",
+      "example": "如果先完成最关键的一项任务，那么中午前能否交付一个可用版本？",
+      "citationLabel": "CBST 对话法课件｜假设逻辑"
+    }
+  ]
+}
