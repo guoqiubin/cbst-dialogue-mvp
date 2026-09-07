@@ -60,7 +60,7 @@ async function handleApiRequest(req, res) {
   }
 
   const body = await readJsonBody(req);
-  const wrappedReq = { method: req.method, body };
+  const wrappedReq = { method: req.method, body, headers: req.headers };
   const wrappedRes = createExpressLikeResponse(res);
   return apiHandler(wrappedReq, wrappedRes);
 }

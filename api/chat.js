@@ -17,6 +17,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    await requireAuthenticatedUser(req);
     const body = req.body || {};
 
     if (body.action === "generate_case") {
@@ -51,9 +52,38 @@ module.exports = async function handler(req, res) {
 
     return res.status(400).json({ error: "Unsupported action" });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "AI request failed" });
+    return res.status(error.statusCode || 500).json({ error: error.message || "AI request failed" });
   }
 };
+
+async function requireAuthenticatedUser(req) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+
+  // Cloud sync is optional for local development. Once configured, it also
+  // protects the paid model endpoint from anonymous public traffic.
+  if (!supabaseUrl || !publishableKey) return;
+
+  const authorization = req.headers?.authorization || req.headers?.Authorization || "";
+  if (!authorization.startsWith("Bearer ")) {
+    const error = new Error("请先登录后再使用 AI 训练功能。");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: {
+      apikey: publishableKey,
+      Authorization: authorization
+    }
+  });
+
+  if (!response.ok) {
+    const error = new Error("登录状态已失效，请重新登录后继续。");
+    error.statusCode = 401;
+    throw error;
+  }
+}
 
 async function generateCase(apiKey, config) {
   const schema = {

@@ -486,7 +486,10 @@ async function callApi(action, payload) {
   try {
     const response = await fetch("./api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...cloudAuthHeaders()
+      },
       body: JSON.stringify({ action, ...payload })
     });
     const data = await response.json().catch(() => ({}));
@@ -498,6 +501,11 @@ async function callApi(action, payload) {
     markConnectionError("模型未连通：请检查本地服务、密钥配置和网络。");
     throw error;
   }
+}
+
+function cloudAuthHeaders() {
+  const token = window.CBSTCloud?.getAccessToken?.();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 function buildLocalCase(config) {

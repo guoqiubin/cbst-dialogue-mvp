@@ -6,6 +6,7 @@ const cloudState = { config: null, session: null, user: null, ready: false };
 window.CBSTCloud = {
   isSignedIn: () => Boolean(cloudState.user),
   getUser: () => cloudState.user,
+  getAccessToken: () => cloudState.session?.access_token || "",
   loadProgress,
   saveProgress,
   removeProgress

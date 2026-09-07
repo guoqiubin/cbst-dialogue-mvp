@@ -95,7 +95,10 @@ async function generateQuestion() {
   try {
     const response = await fetch("./api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...cloudAuthHeaders()
+      },
       body: JSON.stringify({
         action: "generate_logic_question",
         config: {
@@ -142,7 +145,10 @@ async function submitAnswer() {
   try {
     const response = await fetch("./api/chat", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...cloudAuthHeaders()
+      },
       body: JSON.stringify({
         action: "evaluate_logic_answer",
         question: state.question,
@@ -165,6 +171,11 @@ async function submitAnswer() {
     state.loading = false;
     setLoadingState(false);
   }
+}
+
+function cloudAuthHeaders() {
+  const token = window.CBSTCloud?.getAccessToken?.();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 function resetForNewQuestion() {
