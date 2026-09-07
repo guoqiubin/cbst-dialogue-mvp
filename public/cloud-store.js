@@ -226,7 +226,9 @@ async function request(path, options = {}) {
     body: options.body
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(data.message || data.error_description || data.msg || "云端请求未完成。");
+  if (!response.ok) {
+    throw new Error(data.message || data.error_description || data.error || data.msg || "云端请求未完成。");
+  }
   return data;
 }
 

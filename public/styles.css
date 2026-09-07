@@ -338,6 +338,11 @@ button {
   color: var(--danger);
 }
 
+/* Account states and all other conditional panels must never occupy space when hidden. */
+.hidden {
+  display: none !important;
+}
+
 .manual-link-icon {
   display: inline-grid;
   place-items: center;
