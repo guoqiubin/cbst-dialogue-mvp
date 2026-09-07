@@ -158,10 +158,14 @@ async function submitAccountForm() {
     const data = registering
       ? await authRequest("/auth/v1/signup", { email, password, options: { emailRedirectTo: window.location.origin } })
       : await authRequest("/auth/v1/token?grant_type=password", { email, password });
-    if (data.session) await setSession(data.session);
-    if (registering && !data.session) {
+    const session = data.session || (data.access_token ? data : null);
+    if (registering && !session) {
       setAccountStatus("注册成功，请前往邮箱完成验证后再登录。", "success");
     } else {
+      if (!session?.access_token) {
+        throw new Error("登录未取得有效会话。请完成邮箱验证后重新登录。");
+      }
+      await setSession(session);
       setAccountStatus("登录成功，正在同步你的训练进度。", "success");
       document.querySelector("#account-dialog")?.close();
       showAccountNotice("登录成功，云端同步已开启。", "success");
