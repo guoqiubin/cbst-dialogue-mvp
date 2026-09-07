@@ -37,13 +37,41 @@ function injectAccountInterface() {
   const host = document.querySelector(".module-hub-actions") || document.querySelector(".module-hub");
   if (!host || document.querySelector("#account-button")) return;
 
+  const controls = document.createElement("div");
+  controls.className = "account-controls";
+
+  const stateLabel = document.createElement("span");
+  stateLabel.id = "account-state-label";
+  stateLabel.className = "account-state-label";
+  stateLabel.textContent = "未登录";
+
   const trigger = document.createElement("button");
   trigger.id = "account-button";
   trigger.className = "account-button";
   trigger.type = "button";
   trigger.textContent = "登录保存进度";
-  trigger.addEventListener("click", () => document.querySelector("#account-dialog")?.showModal());
-  host.append(trigger);
+  trigger.addEventListener("click", () => {
+    if (cloudState.user) {
+      showAccountNotice("你已登录，训练进度正在同步到云端。", "success");
+      return;
+    }
+    document.querySelector("#account-dialog")?.showModal();
+  });
+
+  const signOutButton = document.createElement("button");
+  signOutButton.id = "account-signout-quick";
+  signOutButton.className = "account-signout-quick hidden";
+  signOutButton.type = "button";
+  signOutButton.textContent = "退出登录";
+  signOutButton.addEventListener("click", signOut);
+
+  const notice = document.createElement("p");
+  notice.id = "account-inline-status";
+  notice.className = "account-inline-status";
+  notice.setAttribute("aria-live", "polite");
+
+  controls.append(stateLabel, trigger, signOutButton, notice);
+  host.append(controls);
 
   const dialog = document.createElement("dialog");
   dialog.id = "account-dialog";
@@ -75,12 +103,20 @@ function injectAccountInterface() {
 
 function renderAccountInterface() {
   const trigger = document.querySelector("#account-button");
+  const stateLabel = document.querySelector("#account-state-label");
+  const quickSignOut = document.querySelector("#account-signout-quick");
   const signedIn = Boolean(cloudState.user);
   if (trigger) {
     trigger.classList.toggle("signed-in", signedIn);
     trigger.textContent = signedIn ? "已登录 · 云端同步" : "登录保存进度";
+    trigger.setAttribute("aria-label", signedIn ? "当前已登录，点击查看同步状态" : "登录后保存训练进度");
     trigger.disabled = !cloudState.config && cloudState.ready;
   }
+  if (stateLabel) {
+    stateLabel.classList.toggle("signed-in", signedIn);
+    stateLabel.textContent = signedIn ? "已登录" : "未登录";
+  }
+  if (quickSignOut) quickSignOut.classList.toggle("hidden", !signedIn);
   const form = document.querySelector("#account-form-fields");
   const signedInView = document.querySelector("#account-signed-in");
   if (!form || !signedInView) return;
@@ -162,6 +198,7 @@ async function signOut() {
   }
   clearSession();
   document.querySelector("#account-dialog")?.close();
+  showAccountNotice("你已退出登录。当前记录仅保存在本机浏览器中。", "info");
 }
 
 function clearSession(announce = true) {
@@ -241,6 +278,18 @@ function setAccountStatus(message, type = "") {
   if (!status) return;
   status.className = "account-status " + type;
   status.textContent = message;
+}
+
+function showAccountNotice(message, type = "") {
+  const notice = document.querySelector("#account-inline-status");
+  if (!notice) return;
+  notice.className = "account-inline-status " + type;
+  notice.textContent = message;
+  window.clearTimeout(showAccountNotice.timer);
+  showAccountNotice.timer = window.setTimeout(() => {
+    notice.textContent = "";
+    notice.className = "account-inline-status";
+  }, 3600);
 }
 
 function readSession() {

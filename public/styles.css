@@ -235,6 +235,82 @@ button {
   transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
 }
 
+.account-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.account-state-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(42, 38, 32, 0.12);
+  border-radius: 999px;
+  background: rgba(42, 38, 32, 0.05);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.account-state-label.signed-in {
+  border-color: rgba(62, 120, 100, 0.28);
+  background: rgba(220, 239, 230, 0.8);
+  color: #256b55;
+}
+
+.account-signout-quick {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid rgba(232, 93, 78, 0.34);
+  border-radius: 999px;
+  background: rgba(255, 245, 241, 0.8);
+  color: #b64135;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.account-inline-status {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 9px);
+  z-index: 3;
+  width: max-content;
+  max-width: min(300px, 80vw);
+  margin: 0;
+  padding: 9px 12px;
+  border: 1px solid rgba(42, 38, 32, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 253, 248, 0.96);
+  box-shadow: 0 10px 24px rgba(42, 38, 32, 0.12);
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.account-inline-status:not(:empty) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.account-inline-status.success {
+  border-color: rgba(62, 120, 100, 0.28);
+  color: #256b55;
+}
+
+.account-inline-status.info {
+  color: var(--ink-soft);
+}
+
 .account-button:hover {
   transform: translateY(-2px);
   border-color: rgba(232, 93, 78, 0.52);
@@ -1581,6 +1657,16 @@ select:disabled {
 
   .module-rail {
     width: 100%;
+  }
+
+  .account-controls {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .account-inline-status {
+    right: auto;
+    left: 0;
   }
 
   .academy-brand {
