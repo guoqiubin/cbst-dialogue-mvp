@@ -4,8 +4,8 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "dev": "node server.js",
-    "start": "node server.js",
-    "check": "node --check server.js && node --check app.js && node --check cognitive.js && node --check logic-training.js && node --check cloud-store.js && node --check api/chat.js && node --check api/status.js && node --check api/public-config.js"
+    "dev": "node dev-server.js",
+    "start": "node dev-server.js",
+    "check": "node --check dev-server.js && node --check public/app.js && node --check public/cognitive.js && node --check public/logic-training.js && node --check public/cloud-store.js && node --check api/chat.js && node --check api/status.js && node --check api/public-config.js"
   }
 }

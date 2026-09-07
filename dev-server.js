@@ -13,7 +13,7 @@ const publicConfigHandler = require("./api/public-config.js");
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "127.0.0.1";
-const ROOT = __dirname;
+const ROOT = path.join(__dirname, "public");
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6-terra";
 
 const MIME_TYPES = {
