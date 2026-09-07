@@ -77,8 +77,8 @@ function injectAccountInterface() {
   dialog.id = "account-dialog";
   dialog.className = "account-dialog";
   dialog.innerHTML = [
-    '<form method="dialog" class="account-dialog-card">',
-    '<button class="dialog-close-button" value="cancel" aria-label="关闭">×</button>',
+    '<form class="account-dialog-card" novalidate>',
+    '<button class="dialog-close-button" type="button" aria-label="关闭">×</button>',
     '<p class="eyebrow">账户与进度</p>',
     '<h2 id="account-dialog-title">登录以保存进度</h2>',
     '<p id="account-dialog-copy" class="account-dialog-copy">登录后，你的训练记录会自动保存到云端，并在不同设备间同步。</p>',
@@ -96,9 +96,14 @@ function injectAccountInterface() {
     '</form>'
   ].join("");
   document.body.append(dialog);
+  dialog.querySelector("form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    void submitAccountForm();
+  });
   dialog.querySelector("#account-submit-button").addEventListener("click", submitAccountForm);
   dialog.querySelector("#account-mode-button").addEventListener("click", toggleAccountMode);
   dialog.querySelector("#account-signout-button").addEventListener("click", signOut);
+  dialog.querySelector(".dialog-close-button").addEventListener("click", () => dialog.close());
 }
 
 function renderAccountInterface() {
@@ -159,6 +164,7 @@ async function submitAccountForm() {
     } else {
       setAccountStatus("登录成功，正在同步你的训练进度。", "success");
       document.querySelector("#account-dialog")?.close();
+      showAccountNotice("登录成功，云端同步已开启。", "success");
     }
   } catch (error) {
     setAccountStatus(error.message || "操作未完成，请检查邮箱和密码后重试。", "error");
@@ -183,7 +189,12 @@ async function restoreSession() {
 async function setSession(session, announce = true) {
   cloudState.session = session;
   writeSession(session);
-  cloudState.user = await currentUser(session.access_token);
+  try {
+    cloudState.user = await currentUser(session.access_token);
+  } catch (error) {
+    clearSession(false);
+    throw new Error(error.message || "登录凭证校验失败，请重新登录。");
+  }
   renderAccountInterface();
   if (announce) announceAuthChange();
 }
