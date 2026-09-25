@@ -9,6 +9,7 @@ const { URL } = require("node:url");
 loadDotEnv(path.join(__dirname, ".env"));
 
 const apiHandler = require("./api/chat.js");
+const knowledgeHandler = require("./api/knowledge.js");
 const publicConfigHandler = require("./api/public-config.js");
 
 const PORT = Number(process.env.PORT || 3000);
@@ -37,7 +38,11 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (requestUrl.pathname === "/api/chat") {
-      return handleApiRequest(req, res);
+      return handleApiRequest(req, res, apiHandler, requestUrl.searchParams);
+    }
+
+    if (requestUrl.pathname === "/api/knowledge") {
+      return handleApiRequest(req, res, knowledgeHandler, requestUrl.searchParams);
     }
 
     if (requestUrl.pathname === "/api/public-config") {
@@ -54,15 +59,16 @@ server.listen(PORT, HOST, () => {
   process.stdout.write(`CBST MVP server running at http://${HOST}:${PORT}\n`);
 });
 
-async function handleApiRequest(req, res) {
-  if (req.method !== "POST") {
-    return sendJson(res, 405, { error: "Method not allowed" });
-  }
-
-  const body = await readJsonBody(req);
-  const wrappedReq = { method: req.method, body, headers: req.headers };
+async function handleApiRequest(req, res, handler, searchParams) {
+  const body = req.method === "GET" ? {} : await readJsonBody(req);
+  const wrappedReq = {
+    method: req.method,
+    body,
+    query: Object.fromEntries(searchParams.entries()),
+    headers: req.headers
+  };
   const wrappedRes = createExpressLikeResponse(res);
-  return apiHandler(wrappedReq, wrappedRes);
+  return handler(wrappedReq, wrappedRes);
 }
 
 async function statusHandler(_req, res) {
@@ -75,7 +81,7 @@ async function statusHandler(_req, res) {
 
 async function handleStaticRequest(pathname, res) {
   const safePath = pathname === "/" ? "/index.html" : pathname;
-  const resolvedPath = path.normalize(path.join(ROOT, safePath));
+  let resolvedPath = path.normalize(path.join(ROOT, safePath));
 
   if (!resolvedPath.startsWith(ROOT)) {
     return sendText(res, 403, "Forbidden");
@@ -89,7 +95,12 @@ async function handleStaticRequest(pathname, res) {
   }
 
   if (stats.isDirectory()) {
-    return sendText(res, 403, "Forbidden");
+    resolvedPath = path.join(resolvedPath, "index.html");
+    try {
+      stats = await fsp.stat(resolvedPath);
+    } catch {
+      return sendText(res, 404, "Not found");
+    }
   }
 
   const ext = path.extname(resolvedPath).toLowerCase();

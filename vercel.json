@@ -5,6 +5,9 @@
     "api/chat.js": {
       "maxDuration": 60,
       "includeFiles": "knowledge-base/**"
+    },
+    "api/knowledge.js": {
+      "maxDuration": 60
     }
   }
 }

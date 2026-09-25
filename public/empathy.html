@@ -4,34 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>共情训练 | CBST 训练器</title>
-    <meta
-      name="description"
-      content="共情训练模块占位页。该模块将独立于 CBST 对话体系开发。"
-    />
-    <link rel="stylesheet" href="./styles.css?v=20260907e" />
+    <meta name="description" content="随机生成一句情绪表达，练习用自然回应接住对方；遇到高风险表达时优先学习安全干预。" />
+    <link rel="stylesheet" href="./styles.css?v=20260925a" />
   </head>
   <body>
     <div class="page-shell">
       <header class="hero">
         <div>
-          <p class="eyebrow">技能模块</p>
+          <p class="eyebrow">独立技能模块</p>
           <h1>共情训练</h1>
-          <p class="hero-copy">
-            这个模块会独立训练用户如何识别、接住并回应对方的情绪，不直接复用 CBST 对话页的参数结构和逻辑参考体系。
-          </p>
+          <p class="hero-copy">每次从一句真实表达开始。写下你会如何回应，系统会从“是否接住体验”而非固定话术的角度给出反馈。</p>
         </div>
         <div class="hero-badge">
-          <span>开发中</span>
-          <strong>独立技能模块</strong>
-          <small>将单独设计输入参数、训练题型与反馈方式</small>
+          <span>单轮练习</span>
+          <strong>先听见，再回应</strong>
+          <small>答案不唯一，重在是否贴近对方</small>
         </div>
       </header>
 
       <section class="module-hub" aria-label="训练模块体系">
-        <div class="module-hub-copy">
-          <p class="eyebrow">技能模块</p>
-          <strong>请选择训练模块</strong>
-        </div>
+        <div class="module-hub-copy"><p class="eyebrow">技能模块</p><strong>请选择训练模块</strong></div>
         <div class="module-hub-actions">
           <nav class="module-rail">
             <a class="module-link" href="./cognitive.html">认知谬误识别</a>
@@ -40,32 +32,35 @@
             <a class="module-link active" href="./empathy.html" aria-current="page">共情训练</a>
             <a class="module-link" href="./listening.html">倾听训练</a>
           </nav>
-          <a class="academy-brand" href="./index.html" aria-label="托德学院出品，返回训练首页">
-            <img src="./assets/todd-academy-logo.jpg" alt="托德学院标识" />
-            <span>托德学院出品</span>
-          </a>
+          <a class="manual-link" href="./manual.html" aria-label="打开 CBST 对话法使用手册"><span class="manual-link-icon" aria-hidden="true">📘</span><span>使用手册</span></a>
+          <a class="academy-brand" href="./index.html" aria-label="托德学院出品，返回训练首页"><img src="./assets/todd-academy-logo.jpg" alt="托德学院标识" /><span>托德学院出品</span></a>
         </div>
       </section>
 
-      <main class="single-layout">
-        <section class="panel placeholder-panel">
-          <p class="eyebrow">共情训练</p>
-          <h2>当前模块开发中，敬请期待</h2>
-          <p class="placeholder-copy">
-            这里未来不会沿用当前 CBST 对话页的“逻辑参考”结构，而是围绕情绪识别、情绪命名、共情回应和关系承接，设计一套独立的训练路径。
-          </p>
+      <main class="empathy-training-layout">
+        <section class="panel empathy-control-panel interactive-panel">
+          <p class="eyebrow">开始练习</p>
+          <h2>随机抽取一句话</h2>
+          <p class="input-note">题目可能表达开心、失落、矛盾或强烈困扰。请不依赖提示，先按你的真实理解作答。</p>
+          <button id="generate-empathy-prompt-button" class="primary-button" type="button">生成一句练习题</button>
+          <div id="empathy-status-box" class="status-box hidden" aria-live="polite"></div>
+          <div class="empathy-disclaimer"><strong>练习边界</strong><p>本模块仅用于沟通学习，不构成心理诊断、治疗建议或危机干预。遇到现实中的自伤、伤人或即时危险，请优先联系当地紧急服务、医疗机构、危机干预资源或可信赖的人。</p></div>
+        </section>
 
-          <div class="placeholder-box">
-            <strong>已明确的产品方向</strong>
-            <ul class="placeholder-list">
-              <li>共情训练将是独立页面，而不是 CBST 对话页中的一个子面板。</li>
-              <li>该模块会拥有自己的一套参数输入和练习目标。</li>
-              <li>未来反馈重点会偏向：是否接住感受、是否避免否定、是否减少抢结论。</li>
-            </ul>
+        <section class="panel empathy-workspace-panel interactive-panel" aria-live="polite">
+          <div class="panel-head"><div><p class="eyebrow">当前题目</p><h2>你会怎样回应？</h2></div><span id="empathy-question-meta" class="turn-indicator">等待出题</span></div>
+          <div id="empathy-prompt-card" class="empathy-prompt-card empty-state">点击“生成一句练习题”，开始一次独立的共情回应练习。</div>
+          <p id="empathy-context" class="empathy-context hidden"></p>
+          <div id="empathy-answer-area" class="empathy-answer-area hidden">
+            <label for="empathy-response-input" class="logic-answer-label">写下你会如何回应</label>
+            <textarea id="empathy-response-input" class="response-input empathy-response-input" rows="5" placeholder="写下一句自然回应。先不急着解决问题，试着让对方感到你听见了。"></textarea>
+            <div class="action-row training-actions"><button id="submit-empathy-response-button" class="primary-button" type="button" disabled>提交回应</button><button id="next-empathy-prompt-button" class="secondary-button" type="button" disabled>下一题</button></div>
           </div>
+          <div id="empathy-feedback-view" class="empathy-feedback-view hidden"></div>
         </section>
       </main>
     </div>
-    <script src="./cloud-store.js?v=20260907f"></script>
+    <script src="./cloud-store.js?v=20260925a"></script>
+    <script src="./empathy.js?v=20260925a"></script>
   </body>
 </html>

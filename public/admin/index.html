@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>知识库后台 | 托德学院</title>
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="stylesheet" href="../styles.css?v=20260925a" />
+  </head>
+  <body>
+    <div class="page-shell admin-shell">
+      <header class="hero admin-hero">
+        <div><p class="eyebrow">运营后台</p><h1>课程知识库</h1><p class="hero-copy">上传课程资料后，系统会先自动提取为待审核知识草稿。只有发布后的条目会参与用户训练。</p></div>
+        <div class="hero-badge"><span>私有资料区</span><strong>可追溯、可撤回</strong><small>原始文件私有保存，删除后保留 30 天恢复期</small></div>
+      </header>
+
+      <section class="module-hub" aria-label="后台导航">
+        <div class="module-hub-copy"><p class="eyebrow">知识库管理</p><strong>资料上传与审核</strong></div>
+        <div class="module-hub-actions">
+          <a class="module-link" href="../index.html">返回训练工具</a>
+        </div>
+      </section>
+
+      <main id="admin-app" class="admin-layout">
+        <section class="panel admin-upload-panel interactive-panel">
+          <p class="eyebrow">新增资料</p>
+          <h2>上传并提取</h2>
+          <p class="input-note">支持 PPTX、PDF、DOCX、Markdown、TXT，单文件不超过 4MB；也可以直接粘贴文本。</p>
+          <label class="field-group"><span>资料标题</span><input id="source-title" class="field-control" maxlength="120" placeholder="例如：共情回应训练课件" /></label>
+          <label class="field-group"><span>原始文件</span><input id="source-file" class="field-control source-file-input" type="file" accept=".pptx,.pdf,.docx,.md,.markdown,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/markdown" /></label>
+          <label class="field-group"><span>或直接粘贴文本</span><textarea id="source-text" class="response-input admin-text-input" rows="8" placeholder="粘贴要纳入课程知识库的正文。"></textarea></label>
+          <fieldset class="module-tag-fieldset"><legend>适用训练模块</legend><div id="source-module-tags" class="module-tag-options"></div></fieldset>
+          <label class="field-group"><span>备注 <em>可选</em></span><input id="source-note" class="field-control" maxlength="400" placeholder="例如：第 3 版，替换旧版示例" /></label>
+          <button id="source-upload-button" class="primary-button" type="button">上传并自动提取</button>
+          <div id="admin-status" class="status-box hidden" aria-live="polite"></div>
+        </section>
+
+        <section class="panel admin-source-panel interactive-panel">
+          <div class="panel-head"><div><p class="eyebrow">资料清单</p><h2>审核与发布</h2></div><button id="refresh-sources-button" class="secondary-button" type="button">刷新</button></div>
+          <div id="admin-access-message" class="admin-access-message">正在验证后台权限...</div>
+          <div id="source-list" class="source-list hidden"></div>
+        </section>
+      </main>
+    </div>
+    <script src="../cloud-store.js?v=20260925a"></script>
+    <script src="./admin.js?v=20260925a"></script>
+  </body>
+</html>

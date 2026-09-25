@@ -13,3 +13,4 @@ npm-debug.log*
 .idea/
 .github-cli-config/
 .env*
+.vercel

@@ -50,6 +50,16 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ evaluation: payload, model: DEFAULT_MODEL });
     }
 
+    if (body.action === "generate_empathy_prompt") {
+      const payload = await generateEmpathyPrompt(apiKey, body.recentPrompts || []);
+      return res.status(200).json({ prompt: payload, model: DEFAULT_MODEL });
+    }
+
+    if (body.action === "evaluate_empathy_response") {
+      const payload = await evaluateEmpathyResponse(apiKey, body.prompt || {}, body.responseText || "");
+      return res.status(200).json({ evaluation: payload, model: DEFAULT_MODEL });
+    }
+
     return res.status(400).json({ error: "Unsupported action" });
   } catch (error) {
     return res.status(error.statusCode || 500).json({ error: error.message || "AI request failed" });
@@ -271,7 +281,7 @@ async function generateLogicQuestion(apiKey, config) {
   const unusedTopics = topics.filter((topic) => !recentTopics.has(topic));
   const availableTopics = unusedTopics.length ? unusedTopics : topics;
   const selectedTopic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
-  const knowledge = getKnowledgeContext("logic-training", `${actualScene} ${actualDifficulty}`, 6);
+  const knowledge = await getKnowledgeContext("logic-training", `${actualScene} ${actualDifficulty}`, 6);
   const schema = {
     sentence: "一句自然的中文生活化表达，不带角色名或引号",
     scene: "实际使用的场景，只能是亲子、校园、亲密关系、职场或家庭",
@@ -338,7 +348,7 @@ async function evaluateLogicAnswer(apiKey, question, answer) {
   if (!selectedLogic.length) throw new Error("请至少选择一种逻辑字词后再提交。");
 
   const responseText = cleanAnalysisText(answer.responseText, 500);
-  const knowledge = getKnowledgeContext("logic-training", `${sentence} ${selectedLogic.join(" ")}`, 8);
+  const knowledge = await getKnowledgeContext("logic-training", `${sentence} ${selectedLogic.join(" ")}`, 8);
   const schema = {
     level: "excellent | improvable | rethink",
     headline: "一句简短、非诊断式的反馈标题",
@@ -430,8 +440,10 @@ function normalizeTrainingOption(value, allowed, fallback) {
   return allowed.includes(value) ? value : fallback;
 }
 
-function getKnowledgeContext(module, query, limit) {
-  const entries = loadKnowledgeEntries().filter((entry) => Array.isArray(entry.modules) && entry.modules.includes(module));
+async function getKnowledgeContext(module, query, limit) {
+  const staticEntries = loadKnowledgeEntries().filter((entry) => Array.isArray(entry.modules) && entry.modules.includes(module));
+  const cloudEntries = await loadPublishedKnowledgeEntries(module);
+  const entries = [...cloudEntries, ...staticEntries];
   const terms = String(query || "").toLowerCase().split(/[\s，、。；：！？]+/).filter(Boolean);
   const ranked = entries
     .map((entry) => ({
@@ -450,6 +462,31 @@ function getKnowledgeContext(module, query, limit) {
   };
 }
 
+async function loadPublishedKnowledgeEntries(module) {
+  const url = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) return [];
+  try {
+    const response = await fetch(`${url}/rest/v1/knowledge_entries?status=eq.published&select=title,module_tags,section_label,content,example,citation_label&limit=120`, {
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, Accept: "application/json" }
+    });
+    if (!response.ok) return [];
+    const rows = await response.json();
+    return (Array.isArray(rows) ? rows : [])
+      .filter((row) => Array.isArray(row.module_tags) && (row.module_tags.includes("global") || row.module_tags.includes(module)))
+      .map((row) => ({
+        source: row.citation_label || "已发布课程资料",
+        section: row.section_label || row.title,
+        topics: row.module_tags,
+        rule: row.content,
+        example: row.example || "",
+        citationLabel: row.citation_label || "已发布课程资料"
+      }));
+  } catch {
+    return [];
+  }
+}
+
 function loadKnowledgeEntries() {
   try {
     const raw = fs.readFileSync(KNOWLEDGE_BASE_PATH, "utf8");
@@ -458,6 +495,143 @@ function loadKnowledgeEntries() {
   } catch {
     return [];
   }
+}
+
+async function generateEmpathyPrompt(apiKey, recentPrompts) {
+  const riskLevel = Math.random() < 0.1 ? "high" : "normal";
+  const knowledge = await getKnowledgeContext("empathy", "共情 感受回应 安全干预", 8);
+  const schema = {
+    sentence: "一位真实的人会说出的第一人称启始句，不带角色名或引号",
+    context: "不超过 28 字的必要背景",
+    emotionType: "positive | negative | complex | high-risk",
+    riskLevel: "normal | high"
+  };
+  const prompt = `
+你是中文共情训练的出题编辑。生成一句供用户练习回应的真实生活化“启始句”。
+
+规则：
+1. 只生成一个人说出的第一人称中文句子，长度 10 至 48 字，不带角色名、引号、建议或答案。
+2. 题目须覆盖积极、消极和复杂情绪，避免反复使用恋爱陪伴、吃饭、回复消息等单一主题。
+3. 对于 normal：让用户有机会练习识别感受、承接体验、澄清需要；不要包含明确自伤、伤人或即时危险。
+4. 对于 high：生成明确但不描述方法的危机信号，如“我一直在想伤害自己，我一个人待着也不安全”。此类题目要求用户练习优先确认安全与连接现实支持，不把它当普通共情题。不要出现血腥、暴力细节。
+5. riskLevel 必须严格等于指定值；normal 对应 emotionType 可为 positive、negative 或 complex；high 对应 high-risk。
+6. 不要重复、改写或沿用近期题目的同一生活事件。
+7. context 仅补充必要环境，不解释答案。
+
+本题风险级别：${riskLevel}
+近期已出题（禁止重复）：${formatRecentEmpathyPrompts(recentPrompts)}
+
+可参考的课程或资料知识：
+${knowledge.context}
+`;
+  const payload = await callJsonResponse(apiKey, prompt, schema, 700);
+  const isHigh = riskLevel === "high";
+  return {
+    sentence: cleanAnalysisText(payload?.sentence, 160),
+    context: cleanAnalysisText(payload?.context, 100),
+    emotionType: isHigh ? "high-risk" : ["positive", "negative", "complex"].includes(payload?.emotionType) ? payload.emotionType : "negative",
+    riskLevel: isHigh ? "high" : "normal"
+  };
+}
+
+async function evaluateEmpathyResponse(apiKey, promptData, responseText) {
+  const sentence = cleanAnalysisText(promptData?.sentence, 180);
+  const response = cleanAnalysisText(responseText, 800);
+  if (!sentence) throw new Error("题目缺失，请重新生成一题。");
+  if (!response) throw new Error("请先写下你的回应。");
+
+  const highRisk = promptData?.riskLevel === "high";
+  const knowledge = await getKnowledgeContext("empathy", `${sentence} ${response}`, 8);
+  const schema = highRisk ? {
+    level: "excellent | improvable | rethink",
+    headline: "一句简洁、温和但清晰的反馈",
+    summary: "不超过两句的整体反馈",
+    safetyStrengths: ["用户回应中有效的安全支持做法"],
+    safetyGaps: ["仍需补足的安全步骤"],
+    improvedReply: "一段示范：承认严重性、直接确认当下安全、鼓励立即联系现实支持与当地资源",
+    nextStep: "一句最优先的现实行动提示",
+    courseReferences: ["简短来源"]
+  } : {
+    level: "excellent | improvable | rethink",
+    headline: "一句简洁、柔化的反馈",
+    summary: "不超过两句的整体反馈",
+    emotionRecognition: "是否准确接住了具体情绪和体验",
+    strengths: ["回应中有效的共情动作"],
+    adjustments: ["可以更自然或更有承接力的地方"],
+    improvedReply: "一段更自然的共情回应示范，不急于给建议",
+    nextQuestion: "一句可以继续了解对方体验的开放问题",
+    courseReferences: ["简短来源"]
+  };
+  const prompt = highRisk ? `
+你是危机识别情境下的沟通训练点评教练。当前题目含有明确的安全风险信号，评分重点不是“有没有共情得好”，而是用户是否把安全放在第一位。
+
+模拟说法：${sentence}
+用户回应：${response}
+
+严格要求：
+1. 使用教育性、非诊断式语气，评价回应内容，不判断用户能力或人格。
+2. 有效回应应包括：简短承认对方的痛苦或严肃性；直接、平静地确认当下是否安全；鼓励立即联系可信赖的人、当地紧急服务、医疗机构或危机干预资源。不要承诺保密，不要只说“想开点”，不要用普通共情替代安全行动。
+3. 不要提供任何自伤或伤人方法、细节或替代方案。
+4. improvedReply 必须是可直接使用的短回应，强调“现在是否安全”和“不要独自承担”，并建议现实支持。
+5. nextStep 只给一项最优先的现实行动，避免长清单。
+6. level 使用 excellent、improvable、rethink。只有安全确认和现实支持都充分时才可 excellent。
+7. courseReferences 只使用资料中存在的 citationLabel；没有适合的则返回空数组。
+
+可参考资料：
+${knowledge.context}
+` : `
+你是中文共情训练的点评教练。请评价用户对一位真实说话者的第一句回应。
+
+模拟说法：${sentence}
+必要背景：${cleanAnalysisText(promptData?.context, 100)}
+用户回应：${response}
+
+严格要求：
+1. 使用教育性、非诊断式语气，评价回应的沟通效果，不评价用户人格。
+2. 优先判断用户是否听见并承接了情绪、处境或在意的事；是否避免过早建议、讲道理、比较、否定感受、抢结论、把焦点转回自己。
+3. 不存在唯一标准话术。若用户的回应自然、真诚且开放，应认可其有效部分。
+4. improvedReply 应简短自然，优先接住感受，再用一个开放问题帮助对方继续表达；不得急于解决问题。
+5. nextQuestion 必须是一个具体、开放、不过度盘问的问题。
+6. level 使用 excellent、improvable、rethink；excellent 表示已经较好接住情绪且没有明显抢结论，improvable 表示方向成立但可更贴近感受，rethink 表示核心上忽略、否定或急于处理对方体验。
+7. courseReferences 只使用资料中存在的 citationLabel；没有适合的则返回空数组。
+
+可参考资料：
+${knowledge.context}
+`;
+  const payload = await callJsonResponse(apiKey, prompt, schema, 1600);
+  return normalizeEmpathyEvaluation(payload, highRisk, knowledge.references);
+}
+
+function normalizeEmpathyEvaluation(payload, highRisk, references) {
+  const level = ["excellent", "improvable", "rethink"].includes(payload?.level) ? payload.level : "improvable";
+  const output = {
+    mode: highRisk ? "safety" : "empathy",
+    level,
+    headline: cleanAnalysisText(payload?.headline, 100) || (highRisk ? "在这个情境里，先确认安全比继续讨论更重要。" : "你的回应已经在尝试承接对方的体验。"),
+    summary: cleanAnalysisText(payload?.summary, 280),
+    improvedReply: cleanAnalysisText(payload?.improvedReply, 500),
+    courseReferences: normalizeReferences(payload?.courseReferences, references)
+  };
+  if (highRisk) {
+    output.safetyStrengths = normalizeTextList(payload?.safetyStrengths, 3, 180);
+    output.safetyGaps = normalizeTextList(payload?.safetyGaps, 3, 180);
+    output.nextStep = cleanAnalysisText(payload?.nextStep, 180);
+  } else {
+    output.emotionRecognition = cleanAnalysisText(payload?.emotionRecognition, 220);
+    output.strengths = normalizeTextList(payload?.strengths, 3, 180);
+    output.adjustments = normalizeTextList(payload?.adjustments, 3, 180);
+    output.nextQuestion = cleanAnalysisText(payload?.nextQuestion, 180);
+  }
+  return output;
+}
+
+function normalizeTextList(value, limit, itemLimit) {
+  return (Array.isArray(value) ? value : []).map((item) => cleanAnalysisText(item, itemLimit)).filter(Boolean).slice(0, limit);
+}
+
+function formatRecentEmpathyPrompts(value) {
+  const prompts = Array.isArray(value) ? value.slice(0, 16).map((item) => cleanAnalysisText(item?.sentence || item, 160)).filter(Boolean) : [];
+  return prompts.length ? prompts.map((item) => `- ${item}`).join("\n") : "（暂无）";
 }
 
 const FALLACY_CATALOG = [

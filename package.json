@@ -6,6 +6,11 @@
   "scripts": {
     "dev": "node dev-server.js",
     "start": "node dev-server.js",
-    "check": "node --check dev-server.js && node --check public/app.js && node --check public/cognitive.js && node --check public/logic-training.js && node --check public/cloud-store.js && node --check api/chat.js && node --check api/status.js && node --check api/public-config.js"
+    "check": "node --check dev-server.js && node --check public/app.js && node --check public/cognitive.js && node --check public/logic-training.js && node --check public/empathy.js && node --check public/admin/admin.js && node --check public/cloud-store.js && node --check api/chat.js && node --check api/knowledge.js && node --check api/status.js && node --check api/public-config.js"
+  },
+  "dependencies": {
+    "jszip": "^3.10.2",
+    "mammoth": "^1.12.3",
+    "pdf-parse": "^2.4.5"
   }
 }
