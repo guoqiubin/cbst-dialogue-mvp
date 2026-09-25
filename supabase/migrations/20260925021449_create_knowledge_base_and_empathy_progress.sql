@@ -59,4 +59,4 @@ alter table public.user_progress
 
 alter table public.user_progress
   add constraint user_progress_module_check
-  check (module in ('dialogue', 'cognitive', 'logic-training', 'empathy', 'emotion'));
+  check (module in ('dialogue', 'cognitive', 'logic-training', 'empathy'));
