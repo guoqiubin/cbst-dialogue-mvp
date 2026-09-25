@@ -1,7 +1,7 @@
 "use strict";
 
 const MODULES = [
-  ["global", "全局通用"], ["dialogue", "CBST 对话"], ["logic-training", "逻辑字词训练"], ["cognitive", "认知谬误识别"], ["empathy", "共情训练"], ["listening", "倾听训练"]
+  ["global", "全局通用"], ["dialogue", "CBST 对话"], ["logic-training", "逻辑字词训练"], ["cognitive", "认知谬误识别"], ["empathy", "共情训练"], ["emotion", "情绪识别训练"], ["listening", "倾听训练"]
 ];
 const elements = {
   title: document.querySelector("#source-title"), file: document.querySelector("#source-file"), text: document.querySelector("#source-text"), tags: document.querySelector("#source-module-tags"), note: document.querySelector("#source-note"), upload: document.querySelector("#source-upload-button"), refresh: document.querySelector("#refresh-sources-button"), status: document.querySelector("#admin-status"), access: document.querySelector("#admin-access-message"), list: document.querySelector("#source-list")

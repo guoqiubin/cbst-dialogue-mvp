@@ -17,7 +17,7 @@ const ALLOWED_TYPES = new Map([
   ["text/plain", "text"],
   ["text/markdown", "markdown"]
 ]);
-const MODULE_TAGS = new Set(["global", "dialogue", "logic-training", "cognitive", "empathy", "listening"]);
+const MODULE_TAGS = new Set(["global", "dialogue", "logic-training", "cognitive", "empathy", "emotion", "listening"]);
 const LEGACY_SOURCE_ID = "9eab3213-4b55-4fa1-93ca-5c5c7f6f2ab9";
 const LEGACY_KNOWLEDGE_PATH = path.join(__dirname, "..", "knowledge-base", "cbst-core.json");
 
@@ -113,7 +113,7 @@ async function ensureLegacyKnowledge() {
     source_type: "legacy",
     extracted_text: "本项目既有结构化 CBST 规则与案例，已迁移为云端知识库的初始已发布资料。",
     summary: "项目原有的 CBST 结构化知识已保留，并作为第一份已发布资料迁入云端。",
-    module_tags: ["dialogue", "logic-training", "cognitive", "empathy", "listening", "global"],
+    module_tags: ["dialogue", "logic-training", "cognitive", "empathy", "emotion", "listening", "global"],
     status: "published",
     entry_count: rows.length,
     published_at: new Date().toISOString()
@@ -260,7 +260,7 @@ async function extractKnowledge(rawText, title, moduleTags) {
     summary: "用两到三句说明资料的专业主题和可用范围",
     entries: [{ title: "知识点标题", entryType: "rule | case | term | safety | guidance", moduleTags: ["global"], sectionLabel: "章节或页码；无法确认时写资料概述", content: "可执行的专业规则或定义", example: "简短例子；没有则空字符串", citationLabel: "面向用户的简短课程依据" }]
   };
-  const prompt = `你是中文心理教育产品的课程资料编辑。请从以下资料中提取可用于训练生成与点评的专业知识草稿。\n\n严格要求：\n1. 只提取原资料清晰支持的规则、定义、案例、边界或安全提示；不补充未经资料支持的结论。\n2. 使用教学性、非诊断式中文。\n3. 最多生成 18 条高价值、彼此不重复的条目。\n4. 每条 content 必须能被模型直接用于出题或点评；不要复制长段原文。\n5. moduleTags 只能从：global、dialogue、logic-training、cognitive、empathy、listening 中选择；优先使用资料建议范围 ${moduleTags.join("、")}。\n6. entryType 只能为 rule、case、term、safety、guidance。\n7. citationLabel 保留资料名和简短章节线索，不得杜撰具体页码。\n\n资料名称：${title}\n\n资料正文：\n${rawText.slice(0, MAX_EXTRACTED_CHARS)}`;
+  const prompt = `你是中文心理教育产品的课程资料编辑。请从以下资料中提取可用于训练生成与点评的专业知识草稿。\n\n严格要求：\n1. 只提取原资料清晰支持的规则、定义、案例、边界或安全提示；不补充未经资料支持的结论。\n2. 使用教学性、非诊断式中文。\n3. 最多生成 18 条高价值、彼此不重复的条目。\n4. 每条 content 必须能被模型直接用于出题或点评；不要复制长段原文。\n5. moduleTags 只能从：global、dialogue、logic-training、cognitive、empathy、emotion、listening 中选择；优先使用资料建议范围 ${moduleTags.join("、")}。\n6. entryType 只能为 rule、case、term、safety、guidance。\n7. citationLabel 保留资料名和简短章节线索，不得杜撰具体页码。\n\n资料名称：${title}\n\n资料正文：\n${rawText.slice(0, MAX_EXTRACTED_CHARS)}`;
   return callJsonResponse(apiKey, prompt, schema, 5000);
 }
 

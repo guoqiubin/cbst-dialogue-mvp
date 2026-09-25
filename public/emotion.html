@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>情绪识别训练 | CBST 训练器</title>
+    <meta name="description" content="通过分层情绪词库、强度与时间语境，练习把笼统感受表达得更具体。" />
+    <link rel="stylesheet" href="./styles.css?v=20260925b" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div><p class="eyebrow">独立技能模块</p><h1>情绪识别训练</h1><p class="hero-copy">从“我很难受”走向更准确的表达。选择具体情绪、标记强度与时间，再把它说成一句可被理解的话。</p></div>
+        <div class="hero-badge"><span>情绪颗粒度</span><strong>说清楚，才更能被理解</strong><small>情绪没有对错，精确不等于压抑</small></div>
+      </header>
+
+      <section class="module-hub" aria-label="训练模块体系">
+        <div class="module-hub-copy"><p class="eyebrow">技能模块</p><strong>请选择训练模块</strong></div>
+        <div class="module-hub-actions">
+          <nav class="module-rail">
+            <a class="module-link" href="./cognitive.html">认知谬误识别</a>
+            <a class="module-link" href="./index.html">CBST对话</a>
+            <a class="module-link" href="./logic-training.html">逻辑字词训练</a>
+            <a class="module-link" href="./empathy.html">共情训练</a>
+            <a class="module-link active" href="./emotion.html" aria-current="page">情绪识别训练</a>
+            <a class="module-link" href="./listening.html">倾听训练</a>
+          </nav>
+          <a class="manual-link" href="./manual.html" aria-label="打开 CBST 对话法使用手册"><span class="manual-link-icon" aria-hidden="true">📘</span><span>使用手册</span></a>
+          <a class="academy-brand" href="./index.html" aria-label="托德学院出品，返回训练首页"><img src="./assets/todd-academy-logo.jpg" alt="托德学院标识" /><span>托德学院出品</span></a>
+        </div>
+      </section>
+
+      <main class="emotion-training-layout">
+        <section class="panel emotion-guide-panel interactive-panel">
+          <p class="eyebrow">训练说明</p><h2>先从大类，再选准确的词</h2>
+          <p class="input-note">情绪词库按情绪家族组织。先选接近的范围，再选一个此刻最贴切的词；不追求“标准答案”。</p>
+          <div class="emotion-source-note"><strong>训练依据</strong><p>课件强调先识别和接住感受，再进入问题讨论；词库以中文常用情绪表达和情绪颗粒度原则整理。</p></div>
+          <div class="clarifier-box"><strong>常见笼统表达，如何再靠近一点？</strong><div id="emotion-clarifiers"></div></div>
+        </section>
+
+        <section class="panel emotion-workspace-panel interactive-panel">
+          <div class="panel-head"><div><p class="eyebrow">表达练习</p><h2>把感受说完整</h2></div><span id="emotion-progress" class="turn-indicator">第 1 步：选择模板</span></div>
+          <div class="template-switch" role="tablist" aria-label="训练模板"><button class="template-button active" data-template="one" type="button">训练模板 1</button><button class="template-button" data-template="two" type="button">训练模板 2</button></div>
+          <p id="template-description" class="template-description">我【时间段】的心情是【情绪词】，强度是【强度分数】。</p>
+
+          <div id="behavior-field" class="field-group hidden"><label for="emotion-behavior">行为名称</label><input id="emotion-behavior" class="field-control" maxlength="80" placeholder="例如：临时取消约定、在会议上打断我" /></div>
+          <div class="field-group"><label for="emotion-time">时间段</label><select id="emotion-time" class="field-control"><option value="现在">现在</option><option value="最近7天">最近 7 天</option><option value="最近1个月">最近 1 个月</option><option value="最近3个月">最近 3 个月</option></select></div>
+
+          <div class="emotion-picker"><div class="picker-head"><strong>选择一种最贴近的情绪或感受</strong><span id="selected-emotion-copy">尚未选择</span></div><div id="emotion-family-tabs" class="emotion-family-tabs" role="tablist"></div><div id="emotion-word-grid" class="emotion-word-grid"></div></div>
+          <div class="intensity-block"><div class="picker-head"><label for="emotion-intensity">情绪强度</label><strong id="intensity-value">5 分</strong></div><input id="emotion-intensity" class="intensity-slider" type="range" min="1" max="10" value="5" /><div class="intensity-scale"><span>1 · 轻微</span><span>10 · 强烈</span></div></div>
+
+          <div class="expression-preview"><span>你的表达</span><p id="emotion-sentence-preview">请选择情绪词，系统会在这里生成你的练习表达。</p></div>
+          <div class="action-row training-actions"><button id="complete-emotion-exercise" class="primary-button" type="button" disabled>完成本次表达</button><button id="reset-emotion-exercise" class="secondary-button" type="button">重新练习</button></div>
+          <div id="emotion-feedback" class="emotion-feedback hidden" aria-live="polite"></div>
+        </section>
+      </main>
+    </div>
+    <script src="./cloud-store.js?v=20260925a"></script>
+    <script src="./emotion-lexicon.js?v=20260925b"></script>
+    <script src="./emotion.js?v=20260925b"></script>
+  </body>
+</html>

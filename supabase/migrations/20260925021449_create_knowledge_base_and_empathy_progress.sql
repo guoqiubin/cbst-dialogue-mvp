@@ -52,11 +52,11 @@ insert into storage.buckets (id, name, public)
 values ('course-sources', 'course-sources', false)
 on conflict (id) do update set public = false;
 
--- Add the independent empathy module to progress storage without touching
+-- Add independent emotional-skills modules without touching
 -- records already saved by existing training modules.
 alter table public.user_progress
   drop constraint if exists user_progress_module_check;
 
 alter table public.user_progress
   add constraint user_progress_module_check
-  check (module in ('dialogue', 'cognitive', 'logic-training', 'empathy'));
+  check (module in ('dialogue', 'cognitive', 'logic-training', 'empathy', 'emotion'));

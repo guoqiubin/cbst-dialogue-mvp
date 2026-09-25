@@ -1731,6 +1731,42 @@ select:disabled {
 
 @media (max-width: 980px) { .admin-layout { grid-template-columns: 1fr; } .admin-upload-panel { position: static; } }
 
+.emotion-training-layout { display: grid; grid-template-columns: minmax(280px, .36fr) minmax(0, 1fr); gap: 20px; margin-top: 20px; align-items: start; }
+.emotion-guide-panel { position: sticky; top: 18px; }
+.emotion-guide-panel h2, .emotion-workspace-panel h2 { margin-top: 8px; }
+.emotion-source-note, .clarifier-box { margin-top: 22px; padding: 16px; border-radius: 16px; background: rgba(42, 38, 32, .045); color: var(--ink-soft); font-size: 14px; line-height: 1.7; }
+.emotion-source-note strong, .clarifier-box strong { color: var(--ink); }
+.emotion-source-note p { margin: 6px 0 0; }
+.clarifier-box details { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(196, 184, 165, .65); }
+.clarifier-box summary { color: var(--ink); cursor: pointer; }
+.clarifier-box p { margin: 7px 0 0; }
+.template-switch { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 12px; }
+.template-button { min-height: 42px; padding: 0 15px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,253,248,.5); color: var(--ink-soft); }
+.template-button.active { border-color: var(--gold); background: linear-gradient(135deg, #E85D4E, #C84B3E); color: #fff9f3; }
+.template-description { margin: 0 0 22px; color: var(--ink-soft); line-height: 1.65; }
+.emotion-picker { margin-top: 22px; padding-top: 22px; border-top: 1px dashed rgba(196,184,165,.9); }
+.picker-head { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; color: var(--ink); }
+.picker-head span { color: var(--ink-soft); font-size: 14px; }
+.emotion-family-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 14px 0 8px; scrollbar-width: thin; }
+.emotion-family-button { flex: 0 0 auto; min-height: 36px; padding: 0 12px; border: 1px solid rgba(196,184,165,.9); border-radius: 999px; background: rgba(255,253,248,.5); color: var(--ink-soft); font-size: 14px; }
+.emotion-family-button.active { border-color: rgba(232,93,78,.6); background: rgba(232,93,78,.11); color: var(--ink); }
+.emotion-word-grid { display: flex; flex-wrap: wrap; gap: 9px; }
+.emotion-word-button { min-height: 38px; padding: 0 13px; border: 1px solid rgba(196,184,165,.85); border-radius: 12px; background: rgba(255,253,248,.6); color: var(--ink); transition: transform 140ms ease, border-color 140ms ease, background 140ms ease; }
+.emotion-word-button:hover { transform: translateY(-2px); border-color: rgba(232,93,78,.5); }
+.emotion-word-button.selected { border-color: var(--gold); background: rgba(232,93,78,.14); box-shadow: 0 6px 16px rgba(232,93,78,.12); }
+.intensity-block { margin-top: 24px; padding: 20px; border: 1px solid rgba(196,184,165,.72); border-radius: 18px; background: rgba(255,253,248,.42); }
+.intensity-slider { --intensity: 44%; width: 100%; height: 10px; margin: 20px 0 8px; appearance: none; border-radius: 999px; outline: none; background: linear-gradient(90deg, #d8e4d7 0%, #f2c6a6 48%, #e85d4e var(--intensity), #e8dfd3 var(--intensity), #e8dfd3 100%); }
+.intensity-slider::-webkit-slider-thumb { width: 23px; height: 23px; appearance: none; border: 3px solid #fff9f3; border-radius: 50%; background: #d84f42; box-shadow: 0 3px 8px rgba(42,38,32,.25); cursor: grab; }
+.intensity-slider::-moz-range-thumb { width: 18px; height: 18px; border: 3px solid #fff9f3; border-radius: 50%; background: #d84f42; box-shadow: 0 3px 8px rgba(42,38,32,.25); cursor: grab; }
+.intensity-scale { display: flex; justify-content: space-between; color: var(--ink-soft); font-size: 13px; }
+.expression-preview { margin-top: 22px; padding: 20px; border-radius: 18px; border-left: 3px solid var(--gold); background: rgba(232,93,78,.075); }
+.expression-preview span { color: var(--ink-soft); font-size: 13px; }
+.expression-preview p { margin: 7px 0 0; color: var(--ink); font-size: 21px; line-height: 1.55; font-family: "Fraunces", "Iowan Old Style", Georgia, "Songti SC", serif; }
+.emotion-feedback { margin-top: 20px; padding: 18px; border: 1px solid rgba(57,122,88,.35); border-radius: 16px; background: rgba(57,122,88,.08); color: var(--ink-soft); line-height: 1.7; }
+.emotion-feedback strong { color: #276c4b; }.emotion-feedback p { margin: 7px 0; }.emotion-feedback span { font-size: 13px; }
+
+@media (max-width: 980px) { .emotion-training-layout { grid-template-columns: 1fr; } .emotion-guide-panel { position: static; } }
+
 @media (max-width: 760px) {
   .page-shell {
     width: min(100% - 20px, 1480px);
