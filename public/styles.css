@@ -209,6 +209,51 @@ button {
   color: #FFF9F3;
 }
 
+.module-family {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid rgba(196, 184, 165, 0.72);
+  border-radius: 999px;
+  background: rgba(42, 38, 32, 0.035);
+}
+
+.module-family .module-link {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 0;
+  background: transparent;
+}
+
+.module-family .module-link.active {
+  background: linear-gradient(135deg, #E85D4E, #C84B3E);
+  color: #FFF9F3;
+}
+
+.module-sub-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: 13px;
+  text-decoration: none;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.module-sub-link::before {
+  content: "子训练 · ";
+  color: rgba(116, 109, 97, 0.72);
+}
+
+.module-sub-link:hover,
+.module-sub-link.active {
+  background: rgba(232, 93, 78, 0.12);
+  color: var(--ink);
+}
+
 .manual-link {
   display: inline-flex;
   align-items: center;
@@ -990,6 +1035,87 @@ button {
   padding-left: 18px;
 }
 
+.manual-module-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.manual-module-card {
+  display: flex;
+  min-height: 238px;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.72);
+  box-shadow: 0 10px 22px rgba(42, 38, 32, 0.05);
+}
+
+.manual-module-card h3 {
+  margin: 7px 0 8px;
+}
+
+.manual-module-card p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.manual-module-card .manual-module-meta {
+  margin-top: 14px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.manual-module-card .manual-module-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  margin-top: auto;
+  padding: 0 14px;
+  border: 1px solid rgba(232, 93, 78, 0.5);
+  border-radius: 999px;
+  background: rgba(232, 93, 78, 0.1);
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.manual-highlight .manual-module-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  margin-top: 14px;
+  padding: 0 14px;
+  border: 1px solid rgba(232, 93, 78, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.64);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.manual-module-card .manual-module-link:hover {
+  background: rgba(232, 93, 78, 0.2);
+  transform: translateY(-2px);
+}
+
+.manual-module-card.empathy-path {
+  border-color: rgba(232, 93, 78, 0.54);
+  background: linear-gradient(135deg, rgba(255, 253, 248, 0.82), rgba(232, 93, 78, 0.1));
+}
+
+.manual-sub-training {
+  display: block;
+  margin-top: 8px;
+  color: #a84438;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .cognitive-layout {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -1767,6 +1893,8 @@ select:disabled {
 
 @media (max-width: 980px) { .emotion-training-layout { grid-template-columns: 1fr; } .emotion-guide-panel { position: static; } }
 
+@media (max-width: 980px) { .manual-module-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 @media (max-width: 760px) {
   .page-shell {
     width: min(100% - 20px, 1480px);
@@ -1801,6 +1929,15 @@ select:disabled {
 
   .module-rail {
     width: 100%;
+  }
+
+  .module-family {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .manual-module-grid {
+    grid-template-columns: 1fr;
   }
 
   .account-controls {
