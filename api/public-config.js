@@ -5,8 +5,6 @@ module.exports = async function handler(req, res) {
   const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY || "";
 
   res.status(200).json({
-    cloudSyncEnabled: Boolean(url && publishableKey),
-    supabaseUrl: url,
-    supabasePublishableKey: publishableKey
+    cloudSyncEnabled: Boolean(url && publishableKey)
   });
 };

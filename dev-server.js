@@ -11,6 +11,7 @@ loadDotEnv(path.join(__dirname, ".env"));
 const apiHandler = require("./api/chat.js");
 const knowledgeHandler = require("./api/knowledge.js");
 const publicConfigHandler = require("./api/public-config.js");
+const cloudHandler = require("./api/cloud.js");
 
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || "127.0.0.1";
@@ -47,6 +48,10 @@ const server = http.createServer(async (req, res) => {
 
     if (requestUrl.pathname === "/api/public-config") {
       return publicConfigHandler(req, createExpressLikeResponse(res));
+    }
+
+    if (requestUrl.pathname === "/api/cloud") {
+      return handleApiRequest(req, res, cloudHandler, requestUrl.searchParams);
     }
 
     return handleStaticRequest(requestUrl.pathname, res);

@@ -17,7 +17,7 @@ void init();
 async function init() {
   injectAccountInterface();
   try {
-    const response = await fetch("./api/public-config", { cache: "no-store" });
+    const response = await fetch("/api/public-config", { cache: "no-store" });
     const config = await response.json();
     if (response.ok && config.cloudSyncEnabled) {
       cloudState.config = config;
@@ -114,8 +114,8 @@ function renderAccountInterface() {
   if (trigger) {
     trigger.classList.toggle("signed-in", signedIn);
     trigger.textContent = signedIn ? "已登录 · 云端同步" : "登录保存进度";
-    trigger.setAttribute("aria-label", signedIn ? "当前已登录，点击查看同步状态" : "登录后保存训练进度");
-    trigger.disabled = !cloudState.config && cloudState.ready;
+    trigger.setAttribute("aria-label", signedIn ? "当前已登录，云端同步已开启" : "登录后保存训练进度");
+    trigger.disabled = signedIn || (!cloudState.config && cloudState.ready);
   }
   if (stateLabel) {
     stateLabel.classList.toggle("signed-in", signedIn);
@@ -268,15 +268,19 @@ function authRequest(path, body) {
 }
 
 async function request(path, options = {}) {
-  const response = await fetch(cloudState.config.supabaseUrl + path, {
-    method: options.method || "GET",
-    headers: {
-      apikey: cloudState.config.supabasePublishableKey,
-      "Content-Type": "application/json",
-      ...(options.headers || {})
-    },
-    body: options.body
-  });
+  let response;
+  try {
+    response = await fetch("/api/cloud?path=" + encodeURIComponent(path), {
+      method: options.method || "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.headers || {})
+      },
+      body: options.body
+    });
+  } catch {
+    throw new Error("当前网络无法连接云端服务，请检查网络后重试。");
+  }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(data.message || data.error_description || data.error || data.msg || "云端请求未完成。");

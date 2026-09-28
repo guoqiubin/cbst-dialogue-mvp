@@ -445,6 +445,21 @@ button {
   background: rgba(220, 239, 230, 0.76);
 }
 
+.account-button:disabled {
+  cursor: default;
+  opacity: 0.82;
+  transform: none;
+}
+
+.account-button:disabled:hover {
+  transform: none;
+  border-color: rgba(42, 38, 32, 0.16);
+}
+
+.account-button.signed-in:disabled:hover {
+  border-color: rgba(62, 120, 100, 0.34);
+}
+
 .account-dialog {
   width: min(92vw, 480px);
   padding: 0;
