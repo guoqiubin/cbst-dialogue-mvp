@@ -65,6 +65,54 @@ button {
   margin: 20px auto 36px;
 }
 
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px 28px;
+  margin-top: 24px;
+  padding: 18px 22px;
+  border-top: 1px solid rgba(42, 38, 32, 0.12);
+  color: var(--ink-soft);
+}
+
+.site-footer .eyebrow {
+  margin: 0;
+}
+
+.site-footer-note {
+  margin: 5px 0 0;
+  font-size: 13px;
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.site-footer-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid rgba(196, 184, 165, 0.8);
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.42);
+  color: var(--deep-soft);
+  font-size: 13px;
+  text-decoration: none;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.site-footer-links a:hover {
+  border-color: rgba(232, 93, 78, 0.55);
+  background: rgba(232, 93, 78, 0.1);
+  transform: translateY(-1px);
+}
+
 .hero {
   display: flex;
   align-items: flex-end;
@@ -1919,6 +1967,16 @@ select:disabled {
     grid-template-columns: 1fr;
     margin: 18px 0 12px;
     padding: 16px 18px;
+  }
+
+  .site-footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    padding: 18px 4px 4px;
+  }
+
+  .site-footer-links {
+    justify-content: flex-start;
   }
 
   .module-hub-actions,
