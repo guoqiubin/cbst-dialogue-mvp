@@ -51,7 +51,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (body.action === "generate_empathy_prompt") {
-      const payload = await generateEmpathyPrompt(apiKey, body.recentPrompts || []);
+      const payload = await generateEmpathyPrompt(apiKey, body.recentPrompts || [], body.emotionComplexity);
       return res.status(200).json({ prompt: payload, model: DEFAULT_MODEL });
     }
 
@@ -497,7 +497,8 @@ function loadKnowledgeEntries() {
   }
 }
 
-async function generateEmpathyPrompt(apiKey, recentPrompts) {
+async function generateEmpathyPrompt(apiKey, recentPrompts, requestedComplexity) {
+  const emotionComplexity = requestedComplexity === "complex" ? "complex" : "simple";
   const riskLevel = Math.random() < 0.1 ? "high" : "normal";
   const knowledge = await getKnowledgeContext("empathy", "共情 感受回应 安全干预", 8);
   const schema = {
@@ -513,12 +514,15 @@ async function generateEmpathyPrompt(apiKey, recentPrompts) {
 1. 只生成一个人说出的第一人称中文句子，长度 10 至 48 字，不带角色名、引号、建议或答案。
 2. 题目须覆盖积极、消极和复杂情绪，避免反复使用恋爱陪伴、吃饭、回复消息等单一主题。
 3. 对于 normal：让用户有机会练习识别感受、承接体验、澄清需要；不要包含明确自伤、伤人或即时危险。
-4. 对于 high：生成明确但不描述方法的危机信号，如“我一直在想伤害自己，我一个人待着也不安全”。此类题目要求用户练习优先确认安全与连接现实支持，不把它当普通共情题。不要出现血腥、暴力细节。
-5. riskLevel 必须严格等于指定值；normal 对应 emotionType 可为 positive、negative 或 complex；high 对应 high-risk。
-6. 不要重复、改写或沿用近期题目的同一生活事件。
-7. context 仅补充必要环境，不解释答案。
+4. 当情绪复杂度为“单一情绪”且风险级别为 normal 时，句子只能有一个清晰的主导情绪，不要加入相反、拉扯或并存的第二种情绪；emotionType 只能是 positive 或 negative。
+5. 当情绪复杂度为“复杂情绪”且风险级别为 normal 时，句子必须自然呈现至少两种并存、拉扯或看似矛盾的情绪/需要，例如欣慰和失落、期待和害怕、轻松和愧疚；不得只列出情绪词，emotionType 必须为 complex。
+6. 对于 high：生成明确但不描述方法的危机信号，如“我一直在想伤害自己，我一个人待着也不安全”。此类题目要求用户练习优先确认安全与连接现实支持，不把它当普通共情题。不要出现血腥、暴力细节。
+7. riskLevel 必须严格等于指定值；high 对应 high-risk。安全风险优先于复杂度训练。
+8. 不要重复、改写或沿用近期题目的同一生活事件。
+9. context 仅补充必要环境，不解释答案。
 
 本题风险级别：${riskLevel}
+用户选择的情绪复杂度：${emotionComplexity === "complex" ? "复杂情绪" : "单一情绪"}
 近期已出题（禁止重复）：${formatRecentEmpathyPrompts(recentPrompts)}
 
 可参考的课程或资料知识：
@@ -529,8 +533,9 @@ ${knowledge.context}
   return {
     sentence: cleanAnalysisText(payload?.sentence, 160),
     context: cleanAnalysisText(payload?.context, 100),
-    emotionType: isHigh ? "high-risk" : ["positive", "negative", "complex"].includes(payload?.emotionType) ? payload.emotionType : "negative",
-    riskLevel: isHigh ? "high" : "normal"
+    emotionType: isHigh ? "high-risk" : emotionComplexity === "complex" ? "complex" : ["positive", "negative"].includes(payload?.emotionType) ? payload.emotionType : "negative",
+    riskLevel: isHigh ? "high" : "normal",
+    emotionComplexity
   };
 }
 

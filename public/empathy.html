@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>共情训练 | CBST 训练器</title>
     <meta name="description" content="随机生成一句情绪表达，练习用自然回应接住对方；遇到高风险表达时优先学习安全干预。" />
-    <link rel="stylesheet" href="./styles.css?v=20260928c" />
+    <link rel="stylesheet" href="./styles.css?v=20260929a" />
   </head>
   <body>
     <div class="page-shell">
@@ -45,6 +45,14 @@
           <p class="eyebrow">开始练习</p>
           <h2>随机抽取一句话</h2>
           <p class="input-note">题目可能表达开心、失落、矛盾或强烈困扰。请不依赖提示，先按你的真实理解作答。</p>
+          <label class="empathy-complexity-field" for="empathy-complexity-select">
+            <span>情绪复杂度</span>
+            <select id="empathy-complexity-select" class="field-control">
+              <option value="simple">单一情绪</option>
+              <option value="complex">复杂情绪</option>
+            </select>
+            <small>复杂情绪会包含并存、拉扯或矛盾的多种感受。</small>
+          </label>
           <button id="generate-empathy-prompt-button" class="primary-button" type="button">生成一句练习题</button>
           <div id="empathy-status-box" class="status-box hidden" aria-live="polite"></div>
           <div class="empathy-disclaimer"><strong>练习边界</strong><p>本模块仅用于沟通学习，不构成心理诊断、治疗建议或危机干预。遇到现实中的自伤、伤人或即时危险，请优先联系当地紧急服务、医疗机构、危机干预资源或可信赖的人。</p></div>
@@ -60,6 +68,12 @@
             <div class="action-row training-actions"><button id="submit-empathy-response-button" class="primary-button" type="button" disabled>提交回应</button><button id="next-empathy-prompt-button" class="secondary-button" type="button" disabled>下一题</button></div>
           </div>
           <div id="empathy-feedback-view" class="empathy-feedback-view hidden"></div>
+          <section id="empathy-share-panel" class="empathy-share-panel hidden" aria-label="分享本题">
+            <div><p class="eyebrow">分享本题</p><h3>把题目与解析生成长图</h3><p>长图仅在当前浏览器生成，可复制或下载，不会上传你的回应。</p></div>
+            <div class="share-actions"><button id="generate-empathy-share-button" class="secondary-button" type="button">生成分享长图</button><button id="copy-empathy-share-button" class="secondary-button hidden" type="button">复制图片</button><button id="download-empathy-share-button" class="primary-button hidden" type="button">下载图片</button></div>
+            <img id="empathy-share-preview" class="empathy-share-preview hidden" alt="本题共情训练分享长图预览" />
+            <p id="empathy-share-status" class="empathy-share-status" aria-live="polite"></p>
+          </section>
         </section>
       </main>
       <footer class="site-footer" aria-label="友情链接">
@@ -71,7 +85,7 @@
         </nav>
       </footer>
     </div>
-    <script src="./cloud-store.js?v=20260925a"></script>
-    <script src="./empathy.js?v=20260925a"></script>
+    <script src="./cloud-store.js?v=20260929a"></script>
+    <script src="./empathy.js?v=20260929a"></script>
   </body>
 </html>

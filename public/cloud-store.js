@@ -15,6 +15,7 @@ window.CBSTCloud = {
 void init();
 
 async function init() {
+  injectContactInterface();
   injectAccountInterface();
   try {
     const response = await fetch("/api/public-config", { cache: "no-store" });
@@ -31,6 +32,37 @@ async function init() {
     renderAccountInterface();
     announceAuthChange();
   }
+}
+
+function injectContactInterface() {
+  const host = document.querySelector(".module-hub-actions") || document.querySelector(".module-hub");
+  if (!host || document.querySelector("#contact-button")) return;
+
+  const trigger = document.createElement("button");
+  trigger.id = "contact-button";
+  trigger.className = "contact-button";
+  trigger.type = "button";
+  trigger.innerHTML = '<span aria-hidden="true">✦</span><span>联系我们</span>';
+
+  const dialog = document.createElement("dialog");
+  dialog.id = "contact-dialog";
+  dialog.className = "contact-dialog";
+  dialog.innerHTML = [
+    '<div class="contact-dialog-card">',
+    '<button class="dialog-close-button" type="button" aria-label="关闭">×</button>',
+    '<p class="eyebrow">联系托德学院</p>',
+    '<h2>扫码添加企业微信</h2>',
+    '<p>产品反馈、内容合作与训练建议，欢迎通过企业微信联系托德老师。</p>',
+    '<img src="/assets/todd-academy-wechat.jpg" alt="托德老师企业微信二维码" />',
+    '<small>请使用微信扫描二维码</small>',
+    '</div>'
+  ].join("");
+
+  trigger.addEventListener("click", () => dialog.showModal());
+  dialog.querySelector(".dialog-close-button").addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+  host.append(trigger);
+  document.body.append(dialog);
 }
 
 function injectAccountInterface() {
