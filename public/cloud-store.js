@@ -52,8 +52,8 @@ function injectContactInterface() {
     '<button class="dialog-close-button" type="button" aria-label="关闭">×</button>',
     '<p class="eyebrow">联系托德学院</p>',
     '<h2>扫码添加企业微信</h2>',
-    '<p>产品反馈、内容合作与训练建议，欢迎通过企业微信联系托德老师。</p>',
-    '<img src="/assets/todd-academy-wechat.jpg" alt="托德老师企业微信二维码" />',
+    '<p>产品反馈、读书会咨询与训练建议，欢迎通过企业微信联系读书会大管家。</p>',
+    '<img src="/assets/todd-academy-wechat.jpg?v=20260929b" alt="读书会大管家企业微信二维码" />',
     '<small>请使用微信扫描二维码</small>',
     '</div>'
   ].join("");
