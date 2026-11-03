@@ -14,3 +14,14 @@ npm-debug.log*
 .github-cli-config/
 .env*
 .vercel
+
+# Private operations and local outputs
+work/
+outputs/
+assets/private/
+assets/avatar.jpg
+assets/wechat-*
+*.mp3
+*.wav
+*.m4a
+*.ogg
