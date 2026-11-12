@@ -111,6 +111,7 @@ async function analyzeText() {
     renderFeaturedAction();
     renderHistoryList();
     showStatus("分析已完成。", "success");
+    if (window.CBSTCloud?.isSignedIn?.()) void window.CBSTCloud.recordBadgeCompletion("cognitive").catch(() => {});
   } catch (error) {
     state.connectionReady = false;
     elements.connectionBanner.className = "connection-banner error";

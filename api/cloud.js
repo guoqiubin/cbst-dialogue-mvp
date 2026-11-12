@@ -5,7 +5,9 @@ const ALLOWED_ROUTES = new Map([
   ["/auth/v1/token", new Set(["POST"])],
   ["/auth/v1/user", new Set(["GET"])],
   ["/auth/v1/logout", new Set(["POST"])],
-  ["/rest/v1/user_progress", new Set(["GET", "POST", "DELETE"])]
+  ["/rest/v1/user_progress", new Set(["GET", "POST", "DELETE"])],
+  ["/rest/v1/user_badge_progress", new Set(["GET"])],
+  ["/rest/v1/rpc/record_badge_completion", new Set(["POST"])]
 ]);
 
 // The browser calls this same-origin proxy so users do not need direct DNS

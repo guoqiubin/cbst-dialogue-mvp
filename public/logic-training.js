@@ -165,6 +165,7 @@ async function submitAnswer() {
     elements.nextButton.disabled = false;
     void syncCloudProgress();
     showStatus("点评已生成。你可以继续下一题。", "success");
+    if (window.CBSTCloud?.isSignedIn?.()) void window.CBSTCloud.recordBadgeCompletion("logic-training").catch(() => {});
   } catch (error) {
     showStatus(error.message || "点评失败，请稍后再试。", "error");
   } finally {

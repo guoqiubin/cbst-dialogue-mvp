@@ -57,6 +57,7 @@ async function submitResponse() {
     elements.nextButton.disabled = false;
     showStatus("反馈已生成。可以继续下一题。", "success");
     void syncCloudProgress();
+    if (window.CBSTCloud?.isSignedIn?.()) void window.CBSTCloud.recordBadgeCompletion("empathy").catch(() => {});
   } catch (error) {
     showStatus(error.message || "点评未完成，请稍后再试。", "error");
   } finally { state.loading = false; setLoading(false); }

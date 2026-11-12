@@ -482,6 +482,112 @@ button {
   background: rgba(255, 247, 241, 0.92);
 }
 
+.badge-wall-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 15px;
+  border: 1px solid rgba(184, 119, 34, 0.3);
+  border-radius: 999px;
+  background: rgba(255, 248, 232, 0.76);
+  color: #76521f;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.badge-wall-button:hover {
+  transform: translateY(-2px);
+  border-color: rgba(184, 119, 34, 0.58);
+  background: rgba(255, 239, 206, 0.88);
+}
+
+.badge-wall-dialog {
+  width: min(94vw, 760px);
+  padding: 0;
+  border: 0;
+  border-radius: 30px;
+  background: transparent;
+  color: var(--deep);
+}
+
+.badge-wall-dialog::backdrop {
+  background: rgba(42, 38, 32, 0.42);
+  backdrop-filter: blur(5px);
+}
+
+.badge-wall-dialog-card {
+  position: relative;
+  padding: 32px;
+  border: 1px solid rgba(196, 184, 165, 0.9);
+  border-radius: 30px;
+  background: linear-gradient(135deg, rgba(255, 253, 248, 0.99), rgba(248, 232, 220, 0.96));
+  box-shadow: 0 24px 64px rgba(42, 38, 32, 0.28);
+}
+
+.badge-wall-dialog-card h2,
+.badge-wall-copy { margin: 0; }
+.badge-wall-dialog-card h2 { margin-top: 6px; font-size: 34px; }
+.badge-wall-copy { margin-top: 8px; color: var(--ink-soft); line-height: 1.7; }
+.badge-wall-body { margin-top: 22px; }
+
+.badge-sign-in-state {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border: 1px dashed rgba(184, 119, 34, 0.42);
+  border-radius: 18px;
+  background: rgba(255, 248, 232, 0.52);
+}
+
+.badge-sign-in-state p { margin: 0; color: var(--ink-soft); line-height: 1.65; }
+.badge-sign-in-state .primary-button { justify-self: start; }
+
+.badge-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1px 10px;
+  align-items: center;
+  padding: 17px 18px;
+  border: 1px solid rgba(184, 119, 34, 0.26);
+  border-radius: 18px;
+  background: rgba(255, 248, 232, 0.62);
+}
+
+.badge-summary strong { grid-row: span 2; color: #9b6019; font-size: 30px; font-family: "Fraunces", "Iowan Old Style", Georgia, "Songti SC", serif; }
+.badge-summary span { font-weight: 700; }
+.badge-summary small { color: var(--ink-soft); }
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.badge-card {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 12px;
+  align-items: center;
+  min-height: 106px;
+  padding: 15px;
+  border: 1px solid rgba(196, 184, 165, 0.75);
+  border-radius: 17px;
+  background: rgba(255, 253, 248, 0.58);
+}
+
+.badge-card.unlocked { border-color: rgba(184, 119, 34, 0.38); background: linear-gradient(135deg, rgba(255, 248, 232, 0.78), rgba(255, 253, 248, 0.84)); }
+.badge-card.locked { opacity: 0.72; }
+.badge-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: rgba(42, 38, 32, 0.08); color: var(--ink-soft); font-size: 23px; }
+.badge-card.unlocked .badge-icon { background: #b87722; color: #fff9f3; box-shadow: 0 7px 16px rgba(184, 119, 34, 0.2); }
+.badge-card strong { display: block; }
+.badge-card p { margin: 4px 0; color: var(--ink-soft); font-size: 13px; line-height: 1.5; }
+.badge-card small { color: #9b6019; font-size: 12px; font-weight: 700; }
+.badge-card.locked small { color: var(--ink-soft); }
+
 .contact-dialog {
   width: min(92vw, 470px);
   padding: 0;
@@ -2264,6 +2370,14 @@ select:disabled {
 
   .academy-brand {
     width: 100%;
+  }
+
+  .badge-wall-dialog-card {
+    padding: 24px 18px;
+  }
+
+  .badge-grid {
+    grid-template-columns: 1fr;
   }
 
   .panel {

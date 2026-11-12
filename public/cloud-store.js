@@ -1,7 +1,19 @@
 "use strict";
 
 const CLOUD_SESSION_KEY = "cbst-cloud-session-v1";
-const cloudState = { config: null, session: null, user: null, ready: false };
+const cloudState = { config: null, session: null, user: null, badgeProgress: null, ready: false };
+const BADGE_DEFINITIONS = [
+  { id: "first-step", icon: "✦", title: "开始练习", description: "完成 1 次有效训练", unlocked: (progress) => progress.totalCompleted >= 1, progress: (progress) => `${Math.min(progress.totalCompleted, 1)}/1 次` },
+  { id: "dialogue", icon: "◇", title: "对话起点", description: "完成 1 次 CBST 对话", unlocked: (progress) => moduleCount(progress, "dialogue") >= 1, progress: (progress) => moduleProgress(progress, "dialogue", 1) },
+  { id: "cognitive", icon: "◈", title: "思维观察", description: "完成 1 次认知谬误识别", unlocked: (progress) => moduleCount(progress, "cognitive") >= 1, progress: (progress) => moduleProgress(progress, "cognitive", 1) },
+  { id: "logic", icon: "⌁", title: "逻辑练习", description: "完成 1 次逻辑字词训练", unlocked: (progress) => moduleCount(progress, "logic-training") >= 1, progress: (progress) => moduleProgress(progress, "logic-training", 1) },
+  { id: "empathy", icon: "♡", title: "共情回应", description: "完成 1 次共情训练", unlocked: (progress) => moduleCount(progress, "empathy") >= 1, progress: (progress) => moduleProgress(progress, "empathy", 1) },
+  { id: "emotion", icon: "☼", title: "情绪命名", description: "完成 1 次情绪识别训练", unlocked: (progress) => moduleCount(progress, "emotion") >= 1, progress: (progress) => moduleProgress(progress, "emotion", 1) },
+  { id: "listening", icon: "◌", title: "倾听回声", description: "完成 1 次反映式倾听训练", unlocked: (progress) => moduleCount(progress, "listening") >= 1, progress: (progress) => moduleProgress(progress, "listening", 1) },
+  { id: "practice-five", icon: "◎", title: "持续练习", description: "累计完成 5 次训练", unlocked: (progress) => progress.totalCompleted >= 5, progress: (progress) => `${Math.min(progress.totalCompleted, 5)}/5 次` },
+  { id: "practice-twenty", icon: "✺", title: "稳定练习", description: "累计完成 20 次训练", unlocked: (progress) => progress.totalCompleted >= 20, progress: (progress) => `${Math.min(progress.totalCompleted, 20)}/20 次` },
+  { id: "all-rounder", icon: "✹", title: "全域练习者", description: "六个训练模块各完成 1 次", unlocked: (progress) => ["dialogue", "cognitive", "logic-training", "empathy", "emotion", "listening"].every((module) => moduleCount(progress, module) >= 1), progress: (progress) => `${["dialogue", "cognitive", "logic-training", "empathy", "emotion", "listening"].filter((module) => moduleCount(progress, module) >= 1).length}/6 个模块` }
+];
 
 window.CBSTCloud = {
   isSignedIn: () => Boolean(cloudState.user),
@@ -9,12 +21,15 @@ window.CBSTCloud = {
   getAccessToken: () => cloudState.session?.access_token || "",
   loadProgress,
   saveProgress,
-  removeProgress
+  removeProgress,
+  loadBadgeProgress,
+  recordBadgeCompletion
 };
 
 void init();
 
 async function init() {
+  injectBadgeInterface();
   injectContactInterface();
   injectAccountInterface();
   try {
@@ -24,6 +39,7 @@ async function init() {
       cloudState.config = config;
       cloudState.session = readSession();
       if (cloudState.session) await restoreSession();
+      if (cloudState.user) await loadBadgeProgress();
     }
   } catch {
     // The local version remains fully usable before cloud sync is configured.
@@ -32,6 +48,76 @@ async function init() {
     renderAccountInterface();
     announceAuthChange();
   }
+}
+
+function injectBadgeInterface() {
+  const host = document.querySelector(".module-hub-actions") || document.querySelector(".module-hub");
+  if (!host || document.querySelector("#badge-wall-button")) return;
+
+  const trigger = document.createElement("button");
+  trigger.id = "badge-wall-button";
+  trigger.className = "badge-wall-button";
+  trigger.type = "button";
+  trigger.innerHTML = '<span aria-hidden="true">🏅</span><span>勋章墙</span>';
+  trigger.addEventListener("click", () => void openBadgeWall());
+  host.append(trigger);
+
+  const dialog = document.createElement("dialog");
+  dialog.id = "badge-wall-dialog";
+  dialog.className = "badge-wall-dialog";
+  dialog.innerHTML = [
+    '<div class="badge-wall-dialog-card">',
+    '<button class="dialog-close-button" type="button" aria-label="关闭">×</button>',
+    '<p class="eyebrow">训练足迹</p>',
+    '<h2>我的勋章墙</h2>',
+    '<p class="badge-wall-copy">每完成一次有效训练，都会在这里留下一个可见的进步痕迹。</p>',
+    '<div id="badge-wall-body" class="badge-wall-body" aria-live="polite"></div>',
+    '</div>'
+  ].join("");
+  dialog.querySelector(".dialog-close-button").addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); });
+  document.body.append(dialog);
+}
+
+async function openBadgeWall() {
+  const dialog = document.querySelector("#badge-wall-dialog");
+  if (!dialog) return;
+  dialog.showModal();
+  renderBadgeWall();
+  if (!cloudState.user) return;
+  try {
+    await loadBadgeProgress();
+  } catch {
+    showAccountNotice("勋章进度暂未同步，稍后会自动重试。", "info");
+  }
+  renderBadgeWall();
+}
+
+function renderBadgeWall() {
+  const body = document.querySelector("#badge-wall-body");
+  if (!body) return;
+  if (!cloudState.user) {
+    body.innerHTML = '<div class="badge-sign-in-state"><strong>登录后开始收集勋章</strong><p>勋章会和训练进度一起保存到云端，并在不同设备间同步。</p><button id="badge-sign-in-button" class="primary-button" type="button">登录保存进度</button></div>';
+    body.querySelector("#badge-sign-in-button").addEventListener("click", () => {
+      document.querySelector("#badge-wall-dialog")?.close();
+      document.querySelector("#account-dialog")?.showModal();
+    });
+    return;
+  }
+
+  const progress = normalizeBadgeProgress(cloudState.badgeProgress);
+  const unlocked = BADGE_DEFINITIONS.filter((badge) => badge.unlocked(progress)).length;
+  body.innerHTML = `
+    <div class="badge-summary"><strong>${unlocked}/${BADGE_DEFINITIONS.length}</strong><span>已点亮勋章</span><small>累计完成 ${progress.totalCompleted} 次训练</small></div>
+    <div class="badge-grid">${BADGE_DEFINITIONS.map((badge) => renderBadgeCard(badge, progress)).join("")}</div>`;
+}
+
+function renderBadgeCard(badge, progress) {
+  const unlocked = badge.unlocked(progress);
+  return `<article class="badge-card ${unlocked ? "unlocked" : "locked"}">
+    <span class="badge-icon" aria-hidden="true">${badge.icon}</span>
+    <div><strong>${badge.title}</strong><p>${badge.description}</p><small>${unlocked ? "已点亮" : badge.progress(progress)}</small></div>
+  </article>`;
 }
 
 function injectContactInterface() {
@@ -231,7 +317,13 @@ async function setSession(session, announce = true) {
     clearSession(false);
     throw new Error(error.message || "登录凭证校验失败，请重新登录。");
   }
+  try {
+    await loadBadgeProgress();
+  } catch {
+    cloudState.badgeProgress = null;
+  }
   renderAccountInterface();
+  renderBadgeWall();
   if (announce) announceAuthChange();
 }
 
@@ -251,8 +343,10 @@ async function signOut() {
 function clearSession(announce = true) {
   cloudState.session = null;
   cloudState.user = null;
+  cloudState.badgeProgress = null;
   window.localStorage.removeItem(CLOUD_SESSION_KEY);
   renderAccountInterface();
+  renderBadgeWall();
   if (announce) announceAuthChange();
 }
 
@@ -289,6 +383,54 @@ async function removeProgress(module) {
     headers: { Authorization: "Bearer " + cloudState.session.access_token }
   });
   return true;
+}
+
+async function loadBadgeProgress() {
+  if (!cloudState.user || !cloudState.session) return null;
+  const rows = await request("/rest/v1/user_badge_progress?select=module_counts,total_completed,seen_modules,updated_at&limit=1", {
+    headers: { Authorization: "Bearer " + cloudState.session.access_token }
+  });
+  cloudState.badgeProgress = normalizeBadgeProgress(Array.isArray(rows) ? rows[0] : null);
+  return cloudState.badgeProgress;
+}
+
+async function recordBadgeCompletion(module) {
+  if (!cloudState.user || !cloudState.session) return { recorded: false, unlocked: [] };
+  const previous = normalizeBadgeProgress(cloudState.badgeProgress);
+  const before = new Set(BADGE_DEFINITIONS.filter((badge) => badge.unlocked(previous)).map((badge) => badge.id));
+  const payload = await request("/rest/v1/rpc/record_badge_completion", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + cloudState.session.access_token },
+    body: JSON.stringify({ p_module: module, p_event_key: createBadgeEventKey() })
+  });
+  cloudState.badgeProgress = normalizeBadgeProgress(payload);
+  const unlocked = BADGE_DEFINITIONS.filter((badge) => badge.unlocked(cloudState.badgeProgress) && !before.has(badge.id));
+  if (unlocked.length) showAccountNotice(`解锁勋章：${unlocked.map((badge) => badge.title).join("、")}。`, "success");
+  window.dispatchEvent(new CustomEvent("cbst:badgechange", { detail: { progress: cloudState.badgeProgress, unlocked } }));
+  return { recorded: true, unlocked };
+}
+
+function normalizeBadgeProgress(value) {
+  const moduleCounts = value?.moduleCounts || value?.module_counts || {};
+  return {
+    moduleCounts: moduleCounts && typeof moduleCounts === "object" ? moduleCounts : {},
+    totalCompleted: Math.max(0, Number(value?.totalCompleted ?? value?.total_completed ?? 0) || 0),
+    seenModules: Array.isArray(value?.seenModules ?? value?.seen_modules) ? (value.seenModules ?? value.seen_modules) : [],
+    updatedAt: value?.updatedAt || value?.updated_at || ""
+  };
+}
+
+function moduleCount(progress, module) {
+  return Math.max(0, Number(progress.moduleCounts?.[module] || 0) || 0);
+}
+
+function moduleProgress(progress, module, target) {
+  return `${Math.min(moduleCount(progress, module), target)}/${target} 次`;
+}
+
+function createBadgeEventKey() {
+  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function currentUser(accessToken) {

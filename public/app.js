@@ -461,6 +461,7 @@ async function endDialogue() {
     showStatus("点评已生成。", "success");
     renderComposer();
     renderEvaluation();
+    if (window.CBSTCloud?.isSignedIn?.()) void window.CBSTCloud.recordBadgeCompletion("dialogue").catch(() => {});
   } catch (error) {
     showStatus(error.message || "生成点评失败，请稍后再试。", "error");
   } finally {

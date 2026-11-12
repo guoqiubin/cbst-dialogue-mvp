@@ -63,7 +63,7 @@ function updateExpression() {
   void syncCloudProgress();
 }
 
-function completeExercise() {
+function completeExercise(recordBadge = true) {
   if (elements.complete.disabled) return;
   state.completed = true;
   const family = lexicon.find((item) => item.id === state.family);
@@ -71,6 +71,7 @@ function completeExercise() {
   elements.feedback.innerHTML = `<strong>表达已完成</strong><p>你把体验说成了“${escapeHtml(state.emotion)}”，并标记为 ${state.intensity} 分。${state.intensity >= 8 ? "强度较高时，可以先给自己一点暂停与支持，再决定是否沟通。" : "这让感受有了更清晰的边界，也更容易被自己和他人理解。"}</p><span>情绪家族：${escapeHtml(family?.label || "未分类")}</span>`;
   elements.progress.textContent = "本次表达已完成";
   void syncCloudProgress();
+  if (recordBadge && window.CBSTCloud?.isSignedIn?.()) void window.CBSTCloud.recordBadgeCompletion("emotion").catch(() => {});
 }
 
 function resetExercise() {
@@ -91,7 +92,7 @@ async function restoreCloudProgress() {
     state.template = payload.template === "two" ? "two" : "one"; state.family = lexicon.some((family) => family.id === payload.family) ? payload.family : state.family; state.emotion = String(payload.emotion || ""); state.intensity = Math.min(10, Math.max(1, Number(payload.intensity || 5))); state.completed = Boolean(payload.completed);
     elements.time.value = payload.time || "现在"; elements.behavior.value = payload.behavior || ""; elements.intensity.value = String(state.intensity);
     elements.templates.forEach((button) => button.classList.toggle("active", button.dataset.template === state.template)); elements.behaviorField.classList.toggle("hidden", state.template !== "two"); elements.description.textContent = state.template === "two" ? "你做了【行为名称】，我的情绪或感受是【情绪词】，强度是【强度分数】。" : "我【时间段】的心情是【情绪词】，强度是【强度分数】。";
-    renderFamilies(); paintIntensity(); updateExpression(); if (state.completed) completeExercise();
+    renderFamilies(); paintIntensity(); updateExpression(); if (state.completed) completeExercise(false);
   } catch { /* Cloud progress is optional for this exercise. */ }
 }
 
