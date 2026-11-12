@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>倾听训练 | CBST 训练器</title>
     <meta name="description" content="通过反映式倾听练习，把对方的话换一种说法说回来，确认理解并帮助对方整理经验。" />
-    <link rel="stylesheet" href="./styles.css?v=20261112b" />
+    <link rel="stylesheet" href="./styles.css?v=20261112c" />
   </head>
   <body>
     <div class="page-shell">
@@ -42,6 +42,11 @@
           <div id="listening-status-box" class="status-box hidden" aria-live="polite"></div>
           <div class="listening-tip"><strong>一个小原则</strong><p>可以用一句简短问题确认理解，例如“我这样理解对吗？”，但不要连续追问。此刻的重点是反映，而不是盘问。</p></div>
           <div class="empathy-disclaimer"><strong>练习边界</strong><p>本模块仅用于沟通学习，不构成心理诊断、治疗建议或危机干预。遇到现实中的自伤、伤人或即时危险，请优先联系当地紧急服务、医疗机构、危机干预资源或可信赖的人。</p></div>
+          <section class="listening-history-panel" aria-label="训练历史">
+            <div class="listening-history-head"><div><p class="eyebrow">训练历史</p><h3>回看过去练习</h3></div><span id="listening-history-count" class="listening-history-count">0 条</span></div>
+            <p class="listening-history-note">每次完成反馈后自动保存。登录后会同步到云端。</p>
+            <div id="listening-history-list" class="listening-history-list"><p class="listening-history-empty">完成第一题后，这里会保留题目、你的回应和解析。</p></div>
+          </section>
         </section>
 
         <section class="panel listening-workspace-panel interactive-panel" aria-live="polite">
@@ -55,6 +60,10 @@
             <div class="action-row training-actions"><button id="submit-listening-response-button" class="primary-button" type="button" disabled>提交回应</button><button id="next-listening-prompt-button" class="secondary-button" type="button" disabled>下一题</button></div>
           </div>
           <div id="listening-feedback-view" class="listening-feedback-view hidden"></div>
+          <section id="listening-export-panel" class="listening-export-panel hidden" aria-live="polite">
+            <div><p class="eyebrow">本题留存</p><h3>把这次练习带走</h3><p>图片包含题目、你的回应和本题解析，适合留存或分享。</p></div>
+            <div class="listening-export-actions"><button id="export-listening-image-button" class="primary-button listening-export-button" type="button">导出本题图片</button><span id="listening-export-status" class="listening-export-status"></span></div>
+          </section>
         </section>
       </main>
       <footer class="site-footer" aria-label="友情链接">
@@ -66,6 +75,6 @@
       </footer>
     </div>
     <script src="./cloud-store.js?v=20261112b"></script>
-    <script src="./listening.js?v=20261112b"></script>
+    <script src="./listening.js?v=20261112c"></script>
   </body>
 </html>
