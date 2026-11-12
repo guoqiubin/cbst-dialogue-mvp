@@ -106,17 +106,17 @@ function renderFeedback(feedback) {
   elements.feedbackView.innerHTML = `
     <div class="feedback-level-head"><span class="feedback-level-badge ${escapeHtml(feedback.level || "improvable")}">${escapeHtml(labels[feedback.level] || labels.improvable)}</span>${safety ? '<span class="safety-label">安全优先情境</span>' : ""}</div>
     <h3>${escapeHtml(feedback.headline || "先让对方知道：你听见了。")}</h3><p>${escapeHtml(feedback.summary || "")}</p>
-    ${!safety && feedback.heardContent ? `<div class="empathy-detail"><strong>你听见了什么</strong><p>${escapeHtml(feedback.heardContent)}</p></div>` : ""}
-    ${renderList(safety ? "回应中已经做到" : "你已经做到", strengths)}
-    ${renderList(safety ? "仍需优先补足" : "可以继续调整", adjustments)}
+    ${!safety && feedback.heardContent ? `<div class="listening-feedback-section ${feedback.level === "excellent" ? "success" : "neutral"}"><strong>你听见了什么</strong><p>${escapeHtml(feedback.heardContent)}</p></div>` : ""}
+    ${renderList(safety ? "回应中已经做到" : "你已经做到", strengths, "success")}
+    ${renderList(safety ? "仍需优先补足" : "可以继续调整", adjustments, "warning")}
     <div class="listening-reference-reply"><strong>参考回应</strong><p>${escapeHtml(feedback.referenceReply || "")}</p><small>参考示例，不是唯一正确答案。</small></div>
     ${safety && feedback.nextStep ? `<div class="empathy-next-question"><strong>此刻最优先的现实行动</strong><p>${escapeHtml(feedback.nextStep)}</p></div>` : ""}
     ${renderReferences(feedback.courseReferences)}`;
 }
 
-function renderList(title, items) {
+function renderList(title, items, variant) {
   const list = Array.isArray(items) ? items.filter(Boolean) : [];
-  return list.length ? `<div class="empathy-detail"><strong>${escapeHtml(title)}</strong><ul>${list.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : "";
+  return list.length ? `<div class="listening-feedback-section ${variant}"><strong>${escapeHtml(title)}</strong><ul>${list.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>` : "";
 }
 function renderReferences(items) { const refs = Array.isArray(items) ? items.filter(Boolean) : []; return refs.length ? `<p class="course-references">参考依据：${refs.map(escapeHtml).join(" · ")}</p>` : ""; }
 function setLoading(loading) { elements.generateButton.disabled = loading; elements.submitButton.disabled = loading || !state.prompt || !elements.responseInput.value.trim() || Boolean(state.feedback); elements.nextButton.disabled = loading || !state.feedback; }
