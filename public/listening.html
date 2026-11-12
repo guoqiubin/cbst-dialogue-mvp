@@ -4,68 +4,57 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>倾听训练 | CBST 训练器</title>
-    <meta
-      name="description"
-      content="倾听训练模块占位页。该模块将独立于 CBST 对话体系开发。"
-    />
-    <link rel="stylesheet" href="./styles.css?v=20260929a" />
+    <meta name="description" content="通过反映式倾听练习，把对方的话换一种说法说回来，确认理解并帮助对方整理经验。" />
+    <link rel="stylesheet" href="./styles.css?v=20261112a" />
   </head>
   <body>
     <div class="page-shell">
       <header class="hero">
         <div>
-          <p class="eyebrow">技能模块</p>
+          <p class="eyebrow">独立技能模块</p>
           <h1>倾听训练</h1>
-          <p class="hero-copy">
-            这个模块会独立训练用户如何稳定地听见事实、情绪、需求和边界，不直接复用 CBST 对话页的参数结构和逻辑参考体系。
-          </p>
+          <p class="hero-copy">从一段真实表达开始。试着把对方的话换一种说法说回来，确认你是否听懂，也帮助对方更清楚地整理自己的经验。</p>
         </div>
-        <div class="hero-badge">
-          <span>开发中</span>
-          <strong>独立技能模块</strong>
-          <small>将单独设计输入参数、训练题型与反馈方式</small>
-        </div>
+        <div class="hero-badge"><span>反映式倾听</span><strong>先听懂，再回应</strong><small>不急着分析、建议或下结论</small></div>
       </header>
 
       <section class="module-hub" aria-label="训练模块体系">
-        <div class="module-hub-copy">
-          <p class="eyebrow">技能模块</p>
-          <strong>请选择训练模块</strong>
-        </div>
+        <div class="module-hub-copy"><p class="eyebrow">技能模块</p><strong>请选择训练模块</strong></div>
         <div class="module-hub-actions">
           <nav class="module-rail">
             <a class="module-link" href="./cognitive.html">认知谬误识别</a>
             <a class="module-link" href="./index.html">CBST对话</a>
             <a class="module-link" href="./logic-training.html">逻辑字词训练</a>
-            <span class="module-family">
-              <a class="module-link" href="./empathy.html">共情训练</a>
-              <a class="module-sub-link" href="./emotion.html">情绪识别</a>
-            </span>
+            <span class="module-family"><a class="module-link" href="./empathy.html">共情训练</a><a class="module-sub-link" href="./emotion.html">情绪识别</a></span>
             <a class="module-link active" href="./listening.html" aria-current="page">倾听训练</a>
           </nav>
-          <a class="academy-brand" href="./index.html" aria-label="托德学院出品，返回训练首页">
-            <img src="./assets/todd-academy-logo.jpg" alt="托德学院标识" />
-            <span><strong>托德学院</strong><small>CBST 训练器</small></span>
-          </a>
+          <a class="manual-link" href="./manual.html" aria-label="打开全站使用手册"><span class="manual-link-icon" aria-hidden="true">📘</span><span>使用手册</span></a>
+          <a class="academy-brand" href="./index.html" aria-label="托德学院出品，返回训练首页"><img src="./assets/todd-academy-logo.jpg" alt="托德学院标识" /><span><strong>托德学院</strong><small>CBST 训练器</small></span></a>
         </div>
       </section>
 
-      <main class="single-layout">
-        <section class="panel placeholder-panel">
-          <p class="eyebrow">倾听训练</p>
-          <h2>当前模块开发中，敬请期待</h2>
-          <p class="placeholder-copy">
-            这里未来也不会沿用当前 CBST 对话页的“逻辑参考”结构，而是围绕倾听层次、复述准确性、打断控制和问题提取，设计一套独立训练路径。
-          </p>
+      <main class="listening-training-layout">
+        <section class="panel listening-control-panel interactive-panel">
+          <p class="eyebrow">开始练习</p>
+          <h2>随机抽取一段表达</h2>
+          <p class="input-note">请先不急着解决问题。试着用自己的话回应：对方经历了什么、感受到什么、最在意什么？</p>
+          <button id="generate-listening-prompt-button" class="primary-button" type="button">生成一题倾听练习</button>
+          <div id="listening-status-box" class="status-box hidden" aria-live="polite"></div>
+          <div class="listening-tip"><strong>一个小原则</strong><p>可以用一句简短问题确认理解，例如“我这样理解对吗？”，但不要连续追问。此刻的重点是反映，而不是盘问。</p></div>
+          <div class="empathy-disclaimer"><strong>练习边界</strong><p>本模块仅用于沟通学习，不构成心理诊断、治疗建议或危机干预。遇到现实中的自伤、伤人或即时危险，请优先联系当地紧急服务、医疗机构、危机干预资源或可信赖的人。</p></div>
+        </section>
 
-          <div class="placeholder-box">
-            <strong>已明确的产品方向</strong>
-            <ul class="placeholder-list">
-              <li>倾听训练将是独立页面，而不是 CBST 对话页中的一个子面板。</li>
-              <li>该模块会拥有自己的一套参数输入和训练任务。</li>
-              <li>未来反馈重点会偏向：是否听到事实、是否抓住重点、是否减少抢答和误解。</li>
-            </ul>
+        <section class="panel listening-workspace-panel interactive-panel" aria-live="polite">
+          <div class="panel-head"><div><p class="eyebrow">当前题目</p><h2>你听见了什么？</h2></div><span id="listening-question-meta" class="turn-indicator">等待出题</span></div>
+          <div id="listening-prompt-card" class="listening-prompt-card empty-state">点击“生成一题倾听练习”，开始一次反映式倾听练习。</div>
+          <p id="listening-context" class="empathy-context hidden"></p>
+          <div id="listening-answer-area" class="empathy-answer-area hidden">
+            <label for="listening-response-input" class="logic-answer-label">写下你的反映式回应</label>
+            <textarea id="listening-response-input" class="response-input listening-response-input" rows="5" placeholder="例如：听起来你……，这件事让你……。我这样理解对吗？"></textarea>
+            <p class="listening-answer-note">参考示例只是理解方向，不存在唯一正确的话术。</p>
+            <div class="action-row training-actions"><button id="submit-listening-response-button" class="primary-button" type="button" disabled>提交回应</button><button id="next-listening-prompt-button" class="secondary-button" type="button" disabled>下一题</button></div>
           </div>
+          <div id="listening-feedback-view" class="listening-feedback-view hidden"></div>
         </section>
       </main>
       <footer class="site-footer" aria-label="友情链接">
@@ -78,5 +67,6 @@
       </footer>
     </div>
     <script src="./cloud-store.js?v=20260929b"></script>
+    <script src="./listening.js?v=20261112a"></script>
   </body>
 </html>

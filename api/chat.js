@@ -60,6 +60,16 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ evaluation: payload, model: DEFAULT_MODEL });
     }
 
+    if (body.action === "generate_listening_prompt") {
+      const payload = await generateListeningPrompt(apiKey, body.recentPrompts || []);
+      return res.status(200).json({ prompt: payload, model: DEFAULT_MODEL });
+    }
+
+    if (body.action === "evaluate_reflective_listening") {
+      const payload = await evaluateReflectiveListening(apiKey, body.prompt || {}, body.responseText || "");
+      return res.status(200).json({ evaluation: payload, model: DEFAULT_MODEL });
+    }
+
     return res.status(400).json({ error: "Unsupported action" });
   } catch (error) {
     return res.status(error.statusCode || 500).json({ error: error.message || "AI request failed" });
@@ -626,6 +636,134 @@ function normalizeEmpathyEvaluation(payload, highRisk, references) {
     output.strengths = normalizeTextList(payload?.strengths, 3, 180);
     output.adjustments = normalizeTextList(payload?.adjustments, 3, 180);
     output.nextQuestion = cleanAnalysisText(payload?.nextQuestion, 180);
+  }
+  return output;
+}
+
+async function generateListeningPrompt(apiKey, recentPrompts) {
+  const riskLevel = Math.random() < 0.1 ? "high" : "normal";
+  const knowledge = await getKnowledgeContext("listening", "倾听 复述 反映式倾听 确认理解 安全", 8);
+  const schema = {
+    sentence: "对方说出的第一人称生活化表达，不带角色名或引号",
+    context: "不超过 28 字的必要背景",
+    focus: "这句话最值得被听见的事实、情绪或在意点",
+    riskLevel: "normal | high"
+  };
+  const prompt = `
+你是中文反映式倾听训练的出题编辑。生成一段供用户练习“把对方的话换一种说法说回来”的生活化表达。
+
+规则：
+1. 只生成“对方”说出的第一人称中文表达，长度 18 至 70 字，不带角色名、引号、建议、答案或课程术语。
+2. normal 题目需要同时包含可被听见的事实、情绪、期待或矛盾中的至少两项，给学习者留下准确反映的空间；题材要覆盖工作、家庭、朋友、自我期待、变化适应和日常压力，避免反复使用亲密关系争执。
+3. 题目不是让用户解决问题。不要把内容写成需要辩论的观点或需要立即给建议的求助。
+4. high 题目需出现明确但不描述方法的自伤、伤人或即时危险信号。此类题目用于练习“先确认安全、连接现实支持”，不作为普通反映式倾听题；不要包含血腥、暴力细节。
+5. riskLevel 必须严格等于指定值。high 题目的 focus 写“先确认当下安全并连接现实支持”。
+6. normal 的 focus 仅供系统点评使用，简短概括对方最在意的处境、体验或需要，不能替用户写回应。
+7. 不要重复、改写或沿用近期题目的同一生活事件、人物关系或核心表达。
+8. context 只补充必要环境，不解释答案。
+
+本题风险级别：${riskLevel}
+近期已出题（禁止重复）：${formatRecentEmpathyPrompts(recentPrompts)}
+
+可参考的课程或资料知识：
+${knowledge.context}
+`;
+  const payload = await callJsonResponse(apiKey, prompt, schema, 760);
+  return {
+    sentence: cleanAnalysisText(payload?.sentence, 240),
+    context: cleanAnalysisText(payload?.context, 100),
+    focus: cleanAnalysisText(payload?.focus, 180),
+    riskLevel: riskLevel === "high" ? "high" : "normal"
+  };
+}
+
+async function evaluateReflectiveListening(apiKey, promptData, responseText) {
+  const sentence = cleanAnalysisText(promptData?.sentence, 260);
+  const response = cleanAnalysisText(responseText, 800);
+  if (!sentence) throw new Error("题目缺失，请重新生成一题。");
+  if (!response) throw new Error("请先写下你的回应。");
+
+  const highRisk = promptData?.riskLevel === "high";
+  const knowledge = await getKnowledgeContext("listening", `${sentence} ${response}`, 8);
+  const schema = highRisk ? {
+    level: "excellent | improvable | rethink",
+    headline: "一句简洁、温和但清晰的反馈",
+    summary: "不超过两句的整体反馈",
+    safetyStrengths: ["用户回应中有效的安全支持做法"],
+    safetyGaps: ["仍需补足的安全步骤"],
+    referenceReply: "1 至 3 句示范，承认严重性、确认当下安全并连接现实支持",
+    nextStep: "一句最优先的现实行动提示",
+    courseReferences: ["简短来源"]
+  } : {
+    level: "excellent | improvable | rethink",
+    headline: "一句简洁、柔化的反馈",
+    summary: "不超过两句的整体反馈",
+    heardContent: "用户听见的具体事实、情绪或在意点；说明准确度",
+    strengths: ["用户回应中有效的反映式倾听动作"],
+    adjustments: ["可调整的一个或多个具体位置"],
+    referenceReply: "1 至 3 句反映式倾听示范，可包含最多一个确认理解的简短问题",
+    courseReferences: ["简短来源"]
+  };
+  const prompt = highRisk ? `
+你是危机识别情境下的沟通训练点评教练。当前题目含有明确的安全风险信号，评分重点不是普通倾听技巧，而是用户是否把安全放在第一位。
+
+对方的表达：${sentence}
+用户回应：${response}
+
+严格要求：
+1. 使用教育性、非诊断式语气，评价回应内容，不判断用户能力或人格。
+2. 有效回应应简短承认痛苦或严肃性、直接平静确认当下是否安全、鼓励立即联系可信赖的人以及当地紧急服务、医疗机构或危机干预资源。
+3. 不要承诺保密，不要仅仅安慰，不要提供自伤或伤人方法、细节或替代方案。
+4. referenceReply 必须为 1 至 3 句可直接使用的短回应，强调现在是否安全、不要独自承担与现实支持。
+5. nextStep 只给一项最优先现实行动，避免长清单。
+6. level 只有安全确认与现实支持都充分时才可为 excellent。
+7. courseReferences 只使用资料中存在的 citationLabel；没有适合的则返回空数组。
+
+可参考资料：
+${knowledge.context}
+` : `
+你是中文反映式倾听训练的点评教练。请评价用户是否用自己的话准确地回应了对方表达的经验。
+
+对方的表达：${sentence}
+必要背景：${cleanAnalysisText(promptData?.context, 100)}
+系统识别的重点：${cleanAnalysisText(promptData?.focus, 180)}
+用户回应：${response}
+
+严格要求：
+1. 反映式倾听的目标是确认理解，并帮助对方更清楚地听见和整理自己的经验，不是替对方分析、说教、安慰、给方案或连续发问。
+2. 评价是否准确听见了事实、情绪和最在意的点；如果用户加入了原话没有表达的推断，要温和说明。
+3. 可以认可自然的同义改写，不能要求逐字复述。不存在唯一正确话术。
+4. 允许一个用于确认理解的简短问题，例如“我这样理解对吗？”，但若出现两个或更多连续问题，或以追问替代回应，应在 adjustments 中指出“减少盘问”。
+5. 过早建议、解释原因、评价对错、比较、转移焦点时，需在 adjustments 中明确指出，但保持柔和、可操作。
+6. referenceReply 必须是 1 至 3 句自然中文，先反映体验；最多包含一个确认理解的简短问题；不能给建议。
+7. level 使用 excellent、improvable、rethink：excellent 表示准确、简洁且不抢结论；improvable 表示方向成立但遗漏或可更贴近；rethink 表示明显建议、评价、误读或连续盘问，未形成反映。
+8. courseReferences 只使用资料中存在的 citationLabel；没有适合的则返回空数组。
+
+可参考资料：
+${knowledge.context}
+`;
+  const payload = await callJsonResponse(apiKey, prompt, schema, 1600);
+  return normalizeListeningEvaluation(payload, highRisk, knowledge.references);
+}
+
+function normalizeListeningEvaluation(payload, highRisk, references) {
+  const level = ["excellent", "improvable", "rethink"].includes(payload?.level) ? payload.level : "improvable";
+  const output = {
+    mode: highRisk ? "safety" : "listening",
+    level,
+    headline: cleanAnalysisText(payload?.headline, 100) || (highRisk ? "这个情境里，先确认安全比继续复述更重要。" : "先让对方知道：你听见了。"),
+    summary: cleanAnalysisText(payload?.summary, 280),
+    referenceReply: cleanAnalysisText(payload?.referenceReply, 500),
+    courseReferences: normalizeReferences(payload?.courseReferences, references)
+  };
+  if (highRisk) {
+    output.safetyStrengths = normalizeTextList(payload?.safetyStrengths, 3, 180);
+    output.safetyGaps = normalizeTextList(payload?.safetyGaps, 3, 180);
+    output.nextStep = cleanAnalysisText(payload?.nextStep, 180);
+  } else {
+    output.heardContent = cleanAnalysisText(payload?.heardContent, 220);
+    output.strengths = normalizeTextList(payload?.strengths, 3, 180);
+    output.adjustments = normalizeTextList(payload?.adjustments, 3, 180);
   }
   return output;
 }
